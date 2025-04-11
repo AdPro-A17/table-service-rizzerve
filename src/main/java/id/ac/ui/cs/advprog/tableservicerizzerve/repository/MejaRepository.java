@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.List;
+import java.util.ArrayList;
 
 @Repository
 public class MejaRepository {
@@ -19,6 +20,6 @@ public class MejaRepository {
     }
 
     public List<Meja> findAll() {
-        return null;
+        return new ArrayList<>(mejaStorage.values());
     }
 }
