@@ -1,5 +1,8 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.controller;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.CreateMejaRequest;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.CreateMejaResponse;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.GetAllMejaResponse;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.service.MejaService;
 import lombok.RequiredArgsConstructor;
