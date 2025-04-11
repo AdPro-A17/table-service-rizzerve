@@ -26,6 +26,6 @@ class MejaTest {
 
     @Test
     void testGetStatus() {
-        assertEquals("tersedia", this.meja.getStatus());
+        assertEquals("TERSEDIA", this.meja.getStatus());
     }
 }
