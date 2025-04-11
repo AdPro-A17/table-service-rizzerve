@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.controller;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.service.MejaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ public class MejaController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createMeja(@RequestBody CreateMejaRequest request) {
-        return null;
+        Meja meja = mejaService.createMeja(request.getNomorMeja(), request.getStatus());
+        return ResponseEntity.status(201).body(new CreateMejaResponse("success", meja));
     }
 }
