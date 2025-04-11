@@ -1,10 +1,11 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.controller;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.CreateMejaRequest;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.GetAllMejaResponse;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.service.MejaService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;

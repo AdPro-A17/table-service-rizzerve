@@ -1,14 +1,12 @@
-package id.ac.ui.cs.advprog.tableservicerizzerve.controller;
+package id.ac.ui.cs.advprog.tableservicerizzerve.dto;
 
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.List;
-
 @Getter
 @AllArgsConstructor
-public class GetAllMejaResponse {
+public class CreateMejaResponse {
     private String status;
-    private List<Meja> data;
+    private Meja meja;
 }
