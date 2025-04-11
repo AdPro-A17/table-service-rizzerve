@@ -18,4 +18,9 @@ public class MejaController {
         Meja meja = mejaService.createMeja(request.getNomorMeja(), request.getStatus());
         return ResponseEntity.status(201).body(new CreateMejaResponse("success", meja));
     }
+
+    @GetMapping
+    public ResponseEntity<?> getAllMeja() {
+        return null;
+    }
 }
