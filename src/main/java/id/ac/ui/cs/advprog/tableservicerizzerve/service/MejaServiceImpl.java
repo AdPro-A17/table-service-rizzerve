@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class MejaServiceImpl implements MejaService {
@@ -29,5 +31,10 @@ public class MejaServiceImpl implements MejaService {
         eventPublisher.publishEvent(new MejaCreatedEvent(this, meja));
 
         return meja;
+    }
+
+    @Override
+    public List<Meja> findAllMeja() {
+        return mejaRepository.findAll();
     }
 }

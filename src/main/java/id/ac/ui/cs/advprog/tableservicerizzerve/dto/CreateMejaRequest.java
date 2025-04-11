@@ -1,4 +1,4 @@
-package id.ac.ui.cs.advprog.tableservicerizzerve.controller;
+package id.ac.ui.cs.advprog.tableservicerizzerve.dto;
 
 import lombok.Getter;
 import lombok.Setter;
