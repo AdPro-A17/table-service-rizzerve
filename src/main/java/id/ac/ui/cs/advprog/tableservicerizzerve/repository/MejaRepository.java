@@ -2,8 +2,15 @@ package id.ac.ui.cs.advprog.tableservicerizzerve.repository;
 
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 public class MejaRepository {
+    private final Map<UUID, Meja> mejaStorage = new ConcurrentHashMap<>();
+
     public Meja save(Meja meja) {
-        return null;
+        mejaStorage.put(meja.getId(), meja);
+        return meja;
     }
 }
