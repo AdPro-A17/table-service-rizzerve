@@ -35,6 +35,6 @@ public class MejaServiceImpl implements MejaService {
 
     @Override
     public List<Meja> findAllMeja() {
-        return null;
+        return mejaRepository.findAll();
     }
 }
