@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/meja")
 @RequiredArgsConstructor
@@ -20,7 +22,9 @@ public class MejaController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getAllMeja() {
-        return null;
+    public ResponseEntity<GetAllMejaResponse> getAllMeja() {
+        List<Meja> mejaList = mejaService.findAllMeja();
+        GetAllMejaResponse response = new GetAllMejaResponse("success", mejaList);
+        return ResponseEntity.ok(response);
     }
 }
