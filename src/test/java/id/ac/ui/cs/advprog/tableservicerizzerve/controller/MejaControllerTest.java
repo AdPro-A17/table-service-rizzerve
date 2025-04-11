@@ -35,4 +35,23 @@ class MejaControllerTest {
         assertEquals(201, response.getStatusCodeValue());
         assertNotNull(response.getBody());
     }
+
+    @Test
+    void testGetAllMeja_ReturnsListOfMeja() {
+        Meja meja1 = new Meja(1, "TERSEDIA");
+        Meja meja2 = new Meja(2, "TERSEDIA");
+
+        when(mejaService.findAllMeja()).thenReturn(List.of(meja1, meja2));
+
+        ResponseEntity<?> response = mejaController.getAllMeja();
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+
+        var responseBody = (java.util.Map<?, ?>) response.getBody();
+        assertEquals("success", responseBody.get("status"));
+
+        var data = (java.util.List<?>) responseBody.get("data");
+        assertEquals(2, data.size());
+    }
 }
