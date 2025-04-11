@@ -16,7 +16,7 @@ public class MejaController {
     private final MejaService mejaService;
 
     @PostMapping("/create")
-    public ResponseEntity<?> createMeja(@RequestBody CreateMejaRequest request) {
+    public ResponseEntity<CreateMejaResponse> createMeja(@RequestBody CreateMejaRequest request) {
         Meja meja = mejaService.createMeja(request.getNomorMeja(), request.getStatus());
         return ResponseEntity.status(201).body(new CreateMejaResponse("success", meja));
     }
