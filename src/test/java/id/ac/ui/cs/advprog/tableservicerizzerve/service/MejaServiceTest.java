@@ -12,15 +12,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class MejaServiceTest {
+
     private MejaRepository mejaRepository;
     private ApplicationEventPublisher eventPublisher;
-    private MejaService mejaService;
+    private MejaServiceImpl mejaService;
 
     @BeforeEach
     void setUp() {
         mejaRepository = mock(MejaRepository.class);
         eventPublisher = mock(ApplicationEventPublisher.class);
-        mejaService = new MejaService(mejaRepository, eventPublisher);
+        mejaService = new MejaServiceImpl(mejaRepository, eventPublisher);
     }
 
     @Test
