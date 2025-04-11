@@ -14,5 +14,8 @@ public class Meja {
     private String status;
 
     public Meja(int nomorMeja, String status) {
+        this.id = UUID.randomUUID();
+        this.nomorMeja = nomorMeja;
+        this.status = status != null ? status : "tersedia";
     }
 }
