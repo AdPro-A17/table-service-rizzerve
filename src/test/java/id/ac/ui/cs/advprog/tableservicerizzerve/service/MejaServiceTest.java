@@ -11,6 +11,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
+
 class MejaServiceTest {
 
     private MejaRepository mejaRepository;
@@ -47,5 +49,21 @@ class MejaServiceTest {
     @Test
     void testCreateMeja_InvalidStatus_ShouldThrowException() {
         assertThrows(IllegalArgumentException.class, () -> mejaService.createMeja(1, "INVALID_STATUS"));
+    }
+
+    @Test
+    void testFindAllMeja_ReturnsListOfMeja() {
+        Meja meja1 = new Meja(1, "TERSEDIA");
+        Meja meja2 = new Meja(2, "TERSEDIA");
+
+        when(mejaRepository.findAll()).thenReturn(List.of(meja1, meja2));
+
+        List<Meja> result = mejaService.findAllMeja();
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(meja1));
+        assertTrue(result.contains(meja2));
+
+        verify(mejaRepository, times(1)).findAll();
     }
 }

@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -34,5 +36,22 @@ class MejaControllerTest {
 
         assertEquals(201, response.getStatusCodeValue());
         assertNotNull(response.getBody());
+    }
+
+    @Test
+    void testGetAllMeja_ReturnsListOfMeja() {
+        Meja meja1 = new Meja(1, "TERSEDIA");
+        Meja meja2 = new Meja(2, "TERSEDIA");
+
+        when(mejaService.findAllMeja()).thenReturn(List.of(meja1, meja2));
+
+        ResponseEntity<?> response = mejaController.getAllMeja();
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+
+        GetAllMejaResponse responseBody = (GetAllMejaResponse) response.getBody();
+        assertEquals("success", responseBody.getStatus());
+        assertEquals(2, responseBody.getData().size());
     }
 }
