@@ -1,23 +1,33 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
+import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaCreatedEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class MejaServiceImpl implements MejaService {
 
     private final MejaRepository mejaRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    public MejaServiceImpl(MejaRepository mejaRepository, ApplicationEventPublisher eventPublisher) {
-        this.mejaRepository = mejaRepository;
-        this.eventPublisher = eventPublisher;
-    }
-
     @Override
     public Meja createMeja(int nomorMeja, String status) {
-        return null;
+        if (nomorMeja < 1) {
+            throw new IllegalArgumentException("nomorMeja must be >= 1");
+        }
+
+        MejaStatus mejaStatus = MejaStatus.fromString(status);
+        Meja meja = new Meja(nomorMeja, mejaStatus.getValue());
+
+        mejaRepository.save(meja);
+        // Observer Implementation
+        eventPublisher.publishEvent(new MejaCreatedEvent(this, meja));
+
+        return meja;
     }
 }
