@@ -7,6 +7,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -48,10 +50,8 @@ class MejaControllerTest {
         assertEquals(200, response.getStatusCodeValue());
         assertNotNull(response.getBody());
 
-        var responseBody = (java.util.Map<?, ?>) response.getBody();
-        assertEquals("success", responseBody.get("status"));
-
-        var data = (java.util.List<?>) responseBody.get("data");
-        assertEquals(2, data.size());
+        GetAllMejaResponse responseBody = (GetAllMejaResponse) response.getBody();
+        assertEquals("success", responseBody.getStatus());
+        assertEquals(2, responseBody.getData().size());
     }
 }
