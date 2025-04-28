@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.repository;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -46,10 +47,10 @@ class MejaRepositoryTest {
     @Test
     void testUpdateMeja() {
         Meja meja = new Meja(3,"TERSEDIA");
-        mejaRepository.save(m);
+        mejaRepository.save(meja);
 
         meja.setNomorMeja(8);
-        meja.setStatus("TERPAKAI");
+        meja.setStatus(MejaStatus.TERPAKAI);
         Meja updated = mejaRepository.update(meja);
 
         assertEquals(8, updated.getNomorMeja());
