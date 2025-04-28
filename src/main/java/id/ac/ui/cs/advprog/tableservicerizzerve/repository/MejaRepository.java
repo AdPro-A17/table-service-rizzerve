@@ -23,6 +23,10 @@ public class MejaRepository {
         return new ArrayList<>(mejaStorage.values());
     }
 
+    public Meja findById(UUID id) {
+        return mejaStorage.get(id);
+    }
+
     public Meja update(Meja meja){
         mejaStorage.put(meja.getId(), meja);
         return meja;
