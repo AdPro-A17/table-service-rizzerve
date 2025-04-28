@@ -24,9 +24,11 @@ public class MejaRepository {
     }
 
     public Meja update(Meja meja){
-        return null;
+        mejaStorage.put(meja.getId(), meja);
+        return meja;
     }
 
     public void delete(UUID id){
+        mejaStorage.remove(id);
     }
 }
