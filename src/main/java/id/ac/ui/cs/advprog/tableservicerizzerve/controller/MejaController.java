@@ -32,9 +32,13 @@ public class MejaController {
 
     @PutMapping("/{id}/update")
     public ResponseEntity<UpdateMejaResponse> updateMeja(@PathVariable UUID id, @RequestBody UpdateMejaRequest req){
+        Meja meja = mejaService.updateMeja(id, req.getNomorMeja(), req.getStatus());
+        return ResponseEntity.ok(new UpdateMejaResponse("success", meja));
     }
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<DeleteMejaResponse> deleteMeja(@PathVariable UUID id){
+        mejaService.deleteMeja(id);
+        return ResponseEntity.ok(new DeleteMejaResponse("success"));
     }
 }
