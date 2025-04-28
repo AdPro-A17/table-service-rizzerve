@@ -42,4 +42,26 @@ class MejaRepositoryTest {
         assertTrue(result.contains(meja1));
         assertTrue(result.contains(meja2));
     }
+
+    @Test
+    void testUpdateMeja() {
+        Meja meja = new Meja(3,"TERSEDIA");
+        mejaRepository.save(m);
+
+        meja.setNomorMeja(8);
+        meja.setStatus("TERPAKAI");
+        Meja updated = mejaRepository.update(meja);
+
+        assertEquals(8, updated.getNomorMeja());
+        assertEquals("TERPAKAI", updated.getStatus());
+    }
+
+    @Test
+    void testDeleteMeja() {
+        Meja meja = new Meja(4,"TERSEDIA");
+        mejaRepository.save(meja);
+        mejaRepository.delete(meja.getId());
+
+        assertTrue(mejaRepository.findAll().isEmpty());
+    }
 }
