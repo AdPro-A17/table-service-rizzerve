@@ -3,6 +3,8 @@ package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaCreatedEvent;
+import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaDeletedEvent;
+import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaUpdatedEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
@@ -41,9 +43,27 @@ public class MejaServiceImpl implements MejaService {
 
     @Override
     public Meja updateMeja(UUID id, int nomor, String status) {
+        if (nomor < 1) {
+            throw new IllegalArgumentException("nomorMeja must be >= 1");
+        }
+
+        Meja existing = mejaRepository.findById(id);
+
+        if (existing == null) {
+            throw new IllegalArgumentException("Meja not found");
+        }
+
+        existing.setNomorMeja(nomor);
+        existing.setStatus(MejaStatus.fromString(status));
+        mejaRepository.update(existing);
+
+        eventPublisher.publishEvent(new MejaUpdatedEvent(this, existing));
+        return existing;
     }
 
     @Override
     public void deleteMeja(UUID id){
+        mejaRepository.delete(id);
+        eventPublisher.publishEvent(new MejaDeletedEvent(this, id));
     }
 }
