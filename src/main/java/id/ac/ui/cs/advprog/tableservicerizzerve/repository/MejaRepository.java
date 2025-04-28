@@ -22,4 +22,11 @@ public class MejaRepository {
     public List<Meja> findAll() {
         return new ArrayList<>(mejaStorage.values());
     }
+
+    public Meja update(Meja meja){
+        return null;
+    }
+
+    public void delete(UUID id){
+    }
 }
