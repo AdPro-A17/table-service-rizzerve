@@ -8,6 +8,9 @@ import java.util.UUID;
 @Getter
 public class MejaDeletedEvent extends ApplicationEvent {
     private final UUID mejaId;
-    public MejaDeletedEvent(Object source, UUID id){
+
+    public MejaDeletedEvent(Object source, UUID mejaId) {
+        super(source);
+        this.mejaId = mejaId;
     }
 }

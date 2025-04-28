@@ -7,6 +7,9 @@ import org.springframework.context.ApplicationEvent;
 @Getter
 public class MejaUpdatedEvent extends ApplicationEvent {
     private final Meja meja;
+
     public MejaUpdatedEvent(Object source, Meja meja) {
+        super(source);
+        this.meja = meja;
     }
 }
