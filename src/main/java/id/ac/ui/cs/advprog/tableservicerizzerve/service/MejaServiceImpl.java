@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,5 +37,13 @@ public class MejaServiceImpl implements MejaService {
     @Override
     public List<Meja> findAllMeja() {
         return mejaRepository.findAll();
+    }
+
+    @Override
+    public Meja updateMeja(UUID id, int nomor, String status) {
+    }
+
+    @Override
+    public void deleteMeja(UUID id){
     }
 }
