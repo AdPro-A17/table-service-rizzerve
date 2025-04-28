@@ -1,7 +1,10 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaCreatedEvent;
+import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaDeletedEvent;
+import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaUpdatedEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
+import java.util.UUID;
 
 class MejaServiceTest {
 
@@ -27,7 +31,7 @@ class MejaServiceTest {
     }
 
     @Test
-    void testCreateMeja_Success() {
+    void testCreateMejaSuccess() {
         Meja meja = new Meja(5, "TERSEDIA");
         when(mejaRepository.save(any(Meja.class))).thenReturn(meja);
 
@@ -42,17 +46,17 @@ class MejaServiceTest {
     }
 
     @Test
-    void testCreateMeja_InvalidNomorMeja_ShouldThrowException() {
+    void testCreateMejaInvalidNomorMejaShouldThrowException() {
         assertThrows(IllegalArgumentException.class, () -> mejaService.createMeja(0, "TERSEDIA"));
     }
 
     @Test
-    void testCreateMeja_InvalidStatus_ShouldThrowException() {
+    void testCreateMejaInvalidStatusShouldThrowException() {
         assertThrows(IllegalArgumentException.class, () -> mejaService.createMeja(1, "INVALID_STATUS"));
     }
 
     @Test
-    void testFindAllMeja_ReturnsListOfMeja() {
+    void testFindAllMejaReturnsListOfMeja() {
         Meja meja1 = new Meja(1, "TERSEDIA");
         Meja meja2 = new Meja(2, "TERSEDIA");
 
@@ -65,5 +69,32 @@ class MejaServiceTest {
         assertTrue(result.contains(meja2));
 
         verify(mejaRepository, times(1)).findAll();
+    }
+
+    @Test
+    void testUpdateMejaSuccess() {
+        UUID id = UUID.randomUUID();
+
+        Meja stored = new Meja(1, MejaStatus.TERSEDIA.getValue());
+        stored.setId(id);
+
+        when(mejaRepository.findById(id)).thenReturn(stored);
+
+        Meja result = mejaService.updateMeja(id, 9, "TERPAKAI");
+
+        assertEquals(9, result.getNomorMeja());
+        assertEquals(MejaStatus.TERPAKAI.getValue(), result.getStatus());
+        verify(eventPublisher).publishEvent(any(MejaUpdatedEvent.class));
+    }
+
+    @Test
+    void testDeleteMejaSuccess() {
+        UUID id = UUID.randomUUID();
+        doNothing().when(mejaRepository).delete(id);
+
+        mejaService.deleteMeja(id);
+
+        verify(mejaRepository).delete(id);
+        verify(eventPublisher).publishEvent(any(MejaDeletedEvent.class));
     }
 }
