@@ -29,16 +29,13 @@ public class MejaServiceImpl implements MejaService {
             throw new InvalidNomorMejaException();
         }
 
-        if (mejaRepository.findByNomorMeja(nomorMeja) != null) {
+        if (mejaRepository.findByNomorMeja(nomorMeja).isPresent()) {
             throw new DuplicateNomorMejaException();
         }
 
-        MejaStatus mejaStatus = MejaStatus.fromString(status);
-        Meja meja = new Meja(nomorMeja, mejaStatus.getValue());
-
+        Meja meja = new Meja(nomorMeja, MejaStatus.fromString(status).getValue());
         mejaRepository.save(meja);
         eventPublisher.publishEvent(new MejaCreatedEvent(this, meja));
-
         return meja;
     }
 
@@ -49,37 +46,30 @@ public class MejaServiceImpl implements MejaService {
 
     @Override
     public Meja updateMeja(UUID id, int nomor, String status) {
+        Meja existing = mejaRepository.findById(id).orElseThrow(MejaNotFoundException::new);
+
         if (nomor < 1) {
             throw new InvalidNomorMejaException();
         }
-
-        if (mejaRepository.findByNomorMeja(nomor) != null && !mejaRepository.findByNomorMeja(nomor).getId().equals(id)) {
-            throw new DuplicateNomorMejaException();
-        }
-
-        Meja existing = mejaRepository.findById(id);
-
-        if (existing == null) {
-            throw new MejaNotFoundException();
-        }
+        mejaRepository.findByNomorMeja(nomor).ifPresent(conflict -> {
+            if (!conflict.getId().equals(id)) {
+                throw new DuplicateNomorMejaException();
+            }
+        });
 
         existing.setNomorMeja(nomor);
         existing.setStatus(MejaStatus.fromString(status));
-        mejaRepository.update(existing);
-
-        eventPublisher.publishEvent(new MejaUpdatedEvent(this, existing));
-        return existing;
+        Meja updated = mejaRepository.save(existing);
+        eventPublisher.publishEvent(new MejaUpdatedEvent(this, updated));
+        return updated;
     }
 
     @Override
     public void deleteMeja(UUID id) {
-        Meja existingMeja = mejaRepository.findById(id);
-
-        if (existingMeja == null) {
+        if (!mejaRepository.existsById(id)) {
             throw new MejaNotFoundException();
         }
-
-        mejaRepository.delete(id);
+        mejaRepository.deleteById(id);
         eventPublisher.publishEvent(new MejaDeletedEvent(this, id));
     }
 }
