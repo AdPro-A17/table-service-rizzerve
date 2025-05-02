@@ -26,11 +26,14 @@ public class MejaServiceImpl implements MejaService {
             throw new IllegalArgumentException("nomorMeja must be >= 1");
         }
 
+        if (mejaRepository.findByNomorMeja(nomorMeja) != null) {
+            throw new IllegalArgumentException("Nomor meja already exists");
+        }
+
         MejaStatus mejaStatus = MejaStatus.fromString(status);
         Meja meja = new Meja(nomorMeja, mejaStatus.getValue());
 
         mejaRepository.save(meja);
-        // Observer Implementation
         eventPublisher.publishEvent(new MejaCreatedEvent(this, meja));
 
         return meja;
@@ -45,6 +48,10 @@ public class MejaServiceImpl implements MejaService {
     public Meja updateMeja(UUID id, int nomor, String status) {
         if (nomor < 1) {
             throw new IllegalArgumentException("nomorMeja must be >= 1");
+        }
+
+        if (mejaRepository.findByNomorMeja(nomor) != null && !mejaRepository.findByNomorMeja(nomor).getId().equals(id)) {
+            throw new IllegalArgumentException("Nomor meja already exists");
         }
 
         Meja existing = mejaRepository.findById(id);
