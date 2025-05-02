@@ -1,6 +1,10 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
 import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.DuplicateNomorMejaException;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.InvalidMejaStatusException;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.InvalidNomorMejaException;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.MejaNotFoundException;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaCreatedEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaDeletedEvent;
@@ -47,18 +51,18 @@ class MejaServiceTest {
 
     @Test
     void testCreateMejaInvalidNomorMejaShouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> mejaService.createMeja(0, "TERSEDIA"));
+        assertThrows(InvalidNomorMejaException.class, () -> mejaService.createMeja(0, "TERSEDIA"));
     }
 
     @Test
     void testCreateMejaInvalidStatusShouldThrowException() {
-        assertThrows(IllegalArgumentException.class, () -> mejaService.createMeja(1, "INVALID_STATUS"));
+        assertThrows(InvalidMejaStatusException.class, () -> mejaService.createMeja(1, "INVALID_STATUS"));
     }
 
     @Test
-    void createMejaDuplicateNomor() {
+    void createMejaDuplicateNomorShouldThrowException() {
         when(mejaRepository.findByNomorMeja(5)).thenReturn(new Meja(5, MejaStatus.TERSEDIA.getValue()));
-        assertThrows(IllegalArgumentException.class, () -> mejaService.createMeja(5, "TERSEDIA"));
+        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.createMeja(5, "TERSEDIA"));
     }
 
     @Test
@@ -105,17 +109,38 @@ class MejaServiceTest {
 
         when(mejaRepository.findById(currentTableId)).thenReturn(currentTable);
         when(mejaRepository.findByNomorMeja(7)).thenReturn(existingTable);
-        assertThrows(IllegalArgumentException.class, () -> mejaService.updateMeja(currentTableId, 7, "TERSEDIA"));
+        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.updateMeja(currentTableId, 7, "TERSEDIA"));
+    }
+
+    @Test
+    void testUpdateMejaNotFoundThrowsException() {
+        UUID invalidId = UUID.randomUUID();
+        when(mejaRepository.findById(invalidId)).thenReturn(null);
+
+        assertThrows(MejaNotFoundException.class, () -> mejaService.updateMeja(invalidId, 9, "TERSEDIA"));
     }
 
     @Test
     void testDeleteMejaSuccess() {
         UUID id = UUID.randomUUID();
+        Meja existingMeja = new Meja(1, MejaStatus.TERSEDIA.getValue());
+        existingMeja.setId(id);
+
+        when(mejaRepository.findById(id)).thenReturn(existingMeja);
         doNothing().when(mejaRepository).delete(id);
 
         mejaService.deleteMeja(id);
 
+        verify(mejaRepository).findById(id);
         verify(mejaRepository).delete(id);
         verify(eventPublisher).publishEvent(any(MejaDeletedEvent.class));
+    }
+
+    @Test
+    void testDeleteMejaNotFoundThrowsException() {
+        UUID invalidId = UUID.randomUUID();
+        when(mejaRepository.findById(invalidId)).thenReturn(null);
+
+        assertThrows(MejaNotFoundException.class, () -> mejaService.deleteMeja(invalidId));
     }
 }
