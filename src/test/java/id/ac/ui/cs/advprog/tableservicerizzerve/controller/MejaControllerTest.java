@@ -54,7 +54,7 @@ class MejaControllerTest {
         assertNotNull(response.getBody());
 
         GetAllMejaResponse responseBody = (GetAllMejaResponse) response.getBody();
-        assertEquals("success", responseBody.getStatus());
+        assertEquals("Retrieved all tables successfully", responseBody.getStatus());
         assertEquals(2, responseBody.getData().size());
     }
 
