@@ -58,6 +58,19 @@ class MejaRepositoryTest {
     }
 
     @Test
+    void testFindByNomorMeja() {
+        Meja mejaA = new Meja(10, "TERSEDIA");
+        Meja mejaB = new Meja(11, "TERSEDIA");
+        mejaRepository.save(mejaA);
+        mejaRepository.save(mejaB);
+        Meja found = mejaRepository.findByNomorMeja(11);
+
+        assertNotNull(found);
+        assertEquals(mejaB.getId(), found.getId());
+        assertEquals(11, found.getNomorMeja());
+    }
+
+    @Test
     void testUpdateMeja() {
         Meja meja = new Meja(3,"TERSEDIA");
         mejaRepository.save(meja);
