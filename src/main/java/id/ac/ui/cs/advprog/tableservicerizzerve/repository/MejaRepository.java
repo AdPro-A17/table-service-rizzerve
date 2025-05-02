@@ -27,6 +27,13 @@ public class MejaRepository {
         return mejaStorage.get(id);
     }
 
+    public Meja findByNomorMeja(int nomor) {
+        return findAll().stream()
+                .filter(m -> m.getNomorMeja() == nomor)
+                .findFirst()
+                .orElse(null);
+    }
+
     public Meja update(Meja meja){
         mejaStorage.put(meja.getId(), meja);
         return meja;
