@@ -56,6 +56,12 @@ class MejaServiceTest {
     }
 
     @Test
+    void createMejaDuplicateNomor() {
+        when(mejaRepository.findByNomorMeja(5)).thenReturn(new Meja(5, MejaStatus.TERSEDIA.getValue()));
+        assertThrows(IllegalArgumentException.class, () -> mejaService.createMeja(5, "TERSEDIA"));
+    }
+
+    @Test
     void testFindAllMejaReturnsListOfMeja() {
         Meja meja1 = new Meja(1, "TERSEDIA");
         Meja meja2 = new Meja(2, "TERSEDIA");
@@ -85,6 +91,21 @@ class MejaServiceTest {
         assertEquals(9, result.getNomorMeja());
         assertEquals(MejaStatus.TERPAKAI.getValue(), result.getStatus());
         verify(eventPublisher).publishEvent(any(MejaUpdatedEvent.class));
+    }
+
+    @Test
+    void updateTableWithExistingNumber() {
+        UUID currentTableId = UUID.randomUUID();
+        UUID existingTableId = UUID.randomUUID();
+
+        Meja currentTable = new Meja(3, MejaStatus.TERSEDIA.getValue());
+        currentTable.setId(currentTableId);
+        Meja existingTable = new Meja(7, MejaStatus.TERSEDIA.getValue());
+        existingTable.setId(existingTableId);
+
+        when(mejaRepository.findById(currentTableId)).thenReturn(currentTable);
+        when(mejaRepository.findByNomorMeja(7)).thenReturn(existingTable);
+        assertThrows(IllegalArgumentException.class, () -> mejaService.updateMeja(currentTableId, 7, "TERSEDIA"));
     }
 
     @Test
