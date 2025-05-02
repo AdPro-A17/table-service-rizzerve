@@ -1,6 +1,9 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
 import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.DuplicateNomorMejaException;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.InvalidNomorMejaException;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.MejaNotFoundException;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaCreatedEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaDeletedEvent;
@@ -23,11 +26,11 @@ public class MejaServiceImpl implements MejaService {
     @Override
     public Meja createMeja(int nomorMeja, String status) {
         if (nomorMeja < 1) {
-            throw new IllegalArgumentException("nomorMeja must be >= 1");
+            throw new InvalidNomorMejaException();
         }
 
         if (mejaRepository.findByNomorMeja(nomorMeja) != null) {
-            throw new IllegalArgumentException("Nomor meja already exists");
+            throw new DuplicateNomorMejaException();
         }
 
         MejaStatus mejaStatus = MejaStatus.fromString(status);
@@ -47,17 +50,17 @@ public class MejaServiceImpl implements MejaService {
     @Override
     public Meja updateMeja(UUID id, int nomor, String status) {
         if (nomor < 1) {
-            throw new IllegalArgumentException("nomorMeja must be >= 1");
+            throw new InvalidNomorMejaException();
         }
 
         if (mejaRepository.findByNomorMeja(nomor) != null && !mejaRepository.findByNomorMeja(nomor).getId().equals(id)) {
-            throw new IllegalArgumentException("Nomor meja already exists");
+            throw new DuplicateNomorMejaException();
         }
 
         Meja existing = mejaRepository.findById(id);
 
         if (existing == null) {
-            throw new IllegalArgumentException("Meja not found");
+            throw new MejaNotFoundException();
         }
 
         existing.setNomorMeja(nomor);
@@ -69,7 +72,13 @@ public class MejaServiceImpl implements MejaService {
     }
 
     @Override
-    public void deleteMeja(UUID id){
+    public void deleteMeja(UUID id) {
+        Meja existingMeja = mejaRepository.findById(id);
+
+        if (existingMeja == null) {
+            throw new MejaNotFoundException();
+        }
+
         mejaRepository.delete(id);
         eventPublisher.publishEvent(new MejaDeletedEvent(this, id));
     }
