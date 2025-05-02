@@ -12,14 +12,14 @@ import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaUpdatedEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.context.ApplicationEventPublisher;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
-import java.util.List;
-import java.util.UUID;
 
 class MejaServiceTest {
 
@@ -31,66 +31,75 @@ class MejaServiceTest {
     void setUp() {
         mejaRepository = mock(MejaRepository.class);
         eventPublisher = mock(ApplicationEventPublisher.class);
-        mejaService = new MejaServiceImpl(mejaRepository, eventPublisher);
+        mejaService    = new MejaServiceImpl(mejaRepository, eventPublisher);
     }
 
     @Test
     void testCreateMejaSuccess() {
-        Meja meja = new Meja(5, "TERSEDIA");
-        when(mejaRepository.save(any(Meja.class))).thenReturn(meja);
+        when(mejaRepository.findByNomorMeja(5)).thenReturn(Optional.empty());
+        when(mejaRepository.save(any(Meja.class))).thenAnswer(i -> i.getArgument(0));
 
-        Meja result = mejaService.createMeja(5, "TERSEDIA");
+        Meja result = mejaService.createMeja(5, MejaStatus.TERSEDIA.getValue());
 
         assertNotNull(result.getId());
         assertEquals(5, result.getNomorMeja());
-        assertEquals("TERSEDIA", result.getStatus());
-
-        verify(mejaRepository, times(1)).save(any(Meja.class));
-        verify(eventPublisher, times(1)).publishEvent(any(MejaCreatedEvent.class));
+        assertEquals(MejaStatus.TERSEDIA.getValue(), result.getStatus());
+        verify(mejaRepository).findByNomorMeja(5);
+        verify(mejaRepository).save(any(Meja.class));
+        verify(eventPublisher).publishEvent(any(MejaCreatedEvent.class));
     }
 
     @Test
-    void testCreateMejaInvalidNomorMejaShouldThrowException() {
-        assertThrows(InvalidNomorMejaException.class, () -> mejaService.createMeja(0, "TERSEDIA"));
+    void testCreateMejaWithNullStatusDefaultsToTersedia() {
+        when(mejaRepository.findByNomorMeja(1)).thenReturn(Optional.empty());
+        when(mejaRepository.save(any(Meja.class))).thenAnswer(i -> i.getArgument(0));
+
+        Meja result = mejaService.createMeja(1, null);
+
+        assertEquals(MejaStatus.TERSEDIA.getValue(), result.getStatus());
     }
 
     @Test
-    void testCreateMejaInvalidStatusShouldThrowException() {
-        assertThrows(InvalidMejaStatusException.class, () -> mejaService.createMeja(1, "INVALID_STATUS"));
+    void testCreateMejaInvalidNomorShouldThrow() {
+        assertThrows(InvalidNomorMejaException.class, () -> mejaService.createMeja(0, MejaStatus.TERSEDIA.getValue()));
     }
 
     @Test
-    void createMejaDuplicateNomorShouldThrowException() {
-        when(mejaRepository.findByNomorMeja(5)).thenReturn(new Meja(5, MejaStatus.TERSEDIA.getValue()));
-        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.createMeja(5, "TERSEDIA"));
+    void testCreateMejaInvalidStatusShouldThrow() {
+        when(mejaRepository.findByNomorMeja(1)).thenReturn(Optional.empty());
+        assertThrows(InvalidMejaStatusException.class, () -> mejaService.createMeja(1, "BAD_STATUS"));
     }
 
     @Test
-    void testFindAllMejaReturnsListOfMeja() {
-        Meja meja1 = new Meja(1, "TERSEDIA");
-        Meja meja2 = new Meja(2, "TERSEDIA");
+    void testCreateMejaDuplicateNomorShouldThrow() {
+        when(mejaRepository.findByNomorMeja(5)).thenReturn(Optional.of(new Meja(5, MejaStatus.TERSEDIA.getValue())));
+        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.createMeja(5, MejaStatus.TERSEDIA.getValue()));
+    }
 
-        when(mejaRepository.findAll()).thenReturn(List.of(meja1, meja2));
+    @Test
+    void testFindAllMeja() {
+        Meja m1 = new Meja(1, MejaStatus.TERSEDIA.getValue());
+        Meja m2 = new Meja(2, MejaStatus.TERSEDIA.getValue());
+        when(mejaRepository.findAll()).thenReturn(List.of(m1, m2));
 
-        List<Meja> result = mejaService.findAllMeja();
+        List<Meja> list = mejaService.findAllMeja();
 
-        assertEquals(2, result.size());
-        assertTrue(result.contains(meja1));
-        assertTrue(result.contains(meja2));
-
-        verify(mejaRepository, times(1)).findAll();
+        assertEquals(2, list.size());
+        assertTrue(list.stream().anyMatch(m -> m.getNomorMeja() == 1));
+        assertTrue(list.stream().anyMatch(m -> m.getNomorMeja() == 2));
+        verify(mejaRepository).findAll();
     }
 
     @Test
     void testUpdateMejaSuccess() {
         UUID id = UUID.randomUUID();
-
         Meja stored = new Meja(1, MejaStatus.TERSEDIA.getValue());
         stored.setId(id);
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
+        when(mejaRepository.findByNomorMeja(9)).thenReturn(Optional.empty());
+        when(mejaRepository.save(any(Meja.class))).thenAnswer(i -> i.getArgument(0));
 
-        when(mejaRepository.findById(id)).thenReturn(stored);
-
-        Meja result = mejaService.updateMeja(id, 9, "TERPAKAI");
+        Meja result = mejaService.updateMeja(id, 9, MejaStatus.TERPAKAI.getValue());
 
         assertEquals(9, result.getNomorMeja());
         assertEquals(MejaStatus.TERPAKAI.getValue(), result.getStatus());
@@ -98,49 +107,72 @@ class MejaServiceTest {
     }
 
     @Test
-    void updateTableWithExistingNumber() {
-        UUID currentTableId = UUID.randomUUID();
-        UUID existingTableId = UUID.randomUUID();
+    void testUpdateMejaDuplicateNomorThrows() {
+        UUID id = UUID.randomUUID();
+        Meja stored   = new Meja(3,  MejaStatus.TERSEDIA.getValue());
+        Meja conflict = new Meja(7,  MejaStatus.TERSEDIA.getValue());
+        stored.setId(id);
+        conflict.setId(UUID.randomUUID());
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
+        when(mejaRepository.findByNomorMeja(7)).thenReturn(Optional.of(conflict));
 
-        Meja currentTable = new Meja(3, MejaStatus.TERSEDIA.getValue());
-        currentTable.setId(currentTableId);
-        Meja existingTable = new Meja(7, MejaStatus.TERSEDIA.getValue());
-        existingTable.setId(existingTableId);
-
-        when(mejaRepository.findById(currentTableId)).thenReturn(currentTable);
-        when(mejaRepository.findByNomorMeja(7)).thenReturn(existingTable);
-        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.updateMeja(currentTableId, 7, "TERSEDIA"));
+        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.updateMeja(id, 7, MejaStatus.TERSEDIA.getValue()));
     }
 
     @Test
-    void testUpdateMejaNotFoundThrowsException() {
-        UUID invalidId = UUID.randomUUID();
-        when(mejaRepository.findById(invalidId)).thenReturn(null);
+    void testUpdateMejaNoConflictWhenSameNumber() {
+        UUID id = UUID.randomUUID();
+        Meja stored = new Meja(5, MejaStatus.TERSEDIA.getValue());
+        stored.setId(id);
 
-        assertThrows(MejaNotFoundException.class, () -> mejaService.updateMeja(invalidId, 9, "TERSEDIA"));
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
+        when(mejaRepository.findByNomorMeja(5)).thenReturn(Optional.of(stored));
+        when(mejaRepository.save(any(Meja.class))).thenAnswer(i -> i.getArgument(0));
+
+        Meja result = mejaService.updateMeja(id, 5, MejaStatus.TERPAKAI.getValue());
+
+        assertEquals(5, result.getNomorMeja());
+        assertEquals(MejaStatus.TERPAKAI.getValue(), result.getStatus());
+        verify(mejaRepository).findByNomorMeja(5);
+    }
+
+    @Test
+    void testUpdateMejaNotFoundThrows() {
+        UUID id = UUID.randomUUID();
+        when(mejaRepository.findById(id)).thenReturn(Optional.empty());
+        assertThrows(MejaNotFoundException.class, () -> mejaService.updateMeja(id, 5, MejaStatus.TERSEDIA.getValue()));
+    }
+
+    @Test
+    void testUpdateMejaInvalidNomorThrows() {
+        UUID id = UUID.randomUUID();
+        Meja stored = new Meja(1, MejaStatus.TERSEDIA.getValue());
+        stored.setId(id);
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
+
+        assertThrows(InvalidNomorMejaException.class, () -> mejaService.updateMeja(id, 0, MejaStatus.TERSEDIA.getValue()));
     }
 
     @Test
     void testDeleteMejaSuccess() {
         UUID id = UUID.randomUUID();
-        Meja existingMeja = new Meja(1, MejaStatus.TERSEDIA.getValue());
-        existingMeja.setId(id);
-
-        when(mejaRepository.findById(id)).thenReturn(existingMeja);
-        doNothing().when(mejaRepository).delete(id);
+        Meja existing = new Meja(4, MejaStatus.TERSEDIA.getValue());
+        existing.setId(id);
+        when(mejaRepository.existsById(id)).thenReturn(true);
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(existing));
+        doNothing().when(mejaRepository).deleteById(id);
 
         mejaService.deleteMeja(id);
 
-        verify(mejaRepository).findById(id);
-        verify(mejaRepository).delete(id);
+        verify(mejaRepository).existsById(id);
+        verify(mejaRepository).deleteById(id);
         verify(eventPublisher).publishEvent(any(MejaDeletedEvent.class));
     }
 
     @Test
-    void testDeleteMejaNotFoundThrowsException() {
-        UUID invalidId = UUID.randomUUID();
-        when(mejaRepository.findById(invalidId)).thenReturn(null);
-
-        assertThrows(MejaNotFoundException.class, () -> mejaService.deleteMeja(invalidId));
+    void testDeleteMejaNotFoundThrows() {
+        UUID id = UUID.randomUUID();
+        when(mejaRepository.findById(id)).thenReturn(Optional.empty());
+        assertThrows(MejaNotFoundException.class, () -> mejaService.deleteMeja(id));
     }
 }
