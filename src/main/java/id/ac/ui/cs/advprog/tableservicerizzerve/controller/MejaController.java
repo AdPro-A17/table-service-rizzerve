@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/meja")
+@RequestMapping("/api/table")
 @RequiredArgsConstructor
 public class MejaController {
 
@@ -20,25 +20,25 @@ public class MejaController {
     @PostMapping("/create")
     public ResponseEntity<CreateMejaResponse> createMeja(@RequestBody CreateMejaRequest request) {
         Meja meja = mejaService.createMeja(request.getNomorMeja(), request.getStatus());
-        return ResponseEntity.status(201).body(new CreateMejaResponse("success", meja));
+        return ResponseEntity.status(201).body(new CreateMejaResponse("Table created successfully", meja));
     }
 
     @GetMapping
     public ResponseEntity<GetAllMejaResponse> getAllMeja() {
         List<Meja> mejaList = mejaService.findAllMeja();
-        GetAllMejaResponse response = new GetAllMejaResponse("success", mejaList);
+        GetAllMejaResponse response = new GetAllMejaResponse("Retrieved all tables successfully", mejaList);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/update")
     public ResponseEntity<UpdateMejaResponse> updateMeja(@PathVariable UUID id, @RequestBody UpdateMejaRequest req){
         Meja meja = mejaService.updateMeja(id, req.getNomorMeja(), req.getStatus());
-        return ResponseEntity.ok(new UpdateMejaResponse("success", meja));
+        return ResponseEntity.ok(new UpdateMejaResponse("Table updated successfully", meja));
     }
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<DeleteMejaResponse> deleteMeja(@PathVariable UUID id){
         mejaService.deleteMeja(id);
-        return ResponseEntity.ok(new DeleteMejaResponse("success"));
+        return ResponseEntity.ok(new DeleteMejaResponse("Table deleted successfully"));
     }
 }
