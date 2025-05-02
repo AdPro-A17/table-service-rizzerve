@@ -10,4 +10,8 @@ class TableServiceRizzerveApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void applicationContextTest() {
+		TableServiceRizzerveApplication.main(new String[] {});
+	}
 }
