@@ -1,45 +1,13 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.repository;
 
-import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
-import java.util.List;
-import java.util.ArrayList;
 
 @Repository
-public class MejaRepository {
-
-    private final Map<UUID, Meja> mejaStorage = new HashMap<>();
-
-    public Meja save(Meja meja) {
-        mejaStorage.put(meja.getId(), meja);
-        return meja;
-    }
-
-    public List<Meja> findAll() {
-        return new ArrayList<>(mejaStorage.values());
-    }
-
-    public Meja findById(UUID id) {
-        return mejaStorage.get(id);
-    }
-
-    public Meja findByNomorMeja(int nomor) {
-        return findAll().stream()
-                .filter(m -> m.getNomorMeja() == nomor)
-                .findFirst()
-                .orElse(null);
-    }
-
-    public Meja update(Meja meja){
-        mejaStorage.put(meja.getId(), meja);
-        return meja;
-    }
-
-    public void delete(UUID id){
-        mejaStorage.remove(id);
-    }
+public interface MejaRepository extends JpaRepository<Meja, UUID> {
+    Optional<Meja> findByNomorMeja(int nomorMeja);
 }
