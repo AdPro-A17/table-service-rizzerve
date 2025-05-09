@@ -10,8 +10,8 @@ class MejaDeletedEventTest {
 
     @Test
     void returnInjectedId() {
-        UUID id     = UUID.randomUUID();
-        Object src  = new Object();
+        UUID id = UUID.randomUUID();
+        Object src = new Object();
 
         MejaDeletedEvent event = new MejaDeletedEvent(src, id);
 
