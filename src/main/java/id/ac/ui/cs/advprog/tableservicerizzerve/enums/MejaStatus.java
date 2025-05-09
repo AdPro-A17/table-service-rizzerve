@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.enums;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.InvalidMejaStatusException;
 import lombok.Getter;
 
 @Getter
@@ -22,6 +23,6 @@ public enum MejaStatus {
                 return mejaStatus;
             }
         }
-        throw new IllegalArgumentException("Invalid status: " + status);
+        throw new InvalidMejaStatusException(status);
     }
 }

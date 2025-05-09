@@ -2,6 +2,7 @@ package id.ac.ui.cs.advprog.tableservicerizzerve.controller;
 
 import id.ac.ui.cs.advprog.tableservicerizzerve.dto.CreateMejaRequest;
 import id.ac.ui.cs.advprog.tableservicerizzerve.dto.GetAllMejaResponse;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.UpdateMejaRequest;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.service.MejaService;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -40,7 +42,7 @@ class MejaControllerTest {
     }
 
     @Test
-    void testGetAllMeja_ReturnsListOfMeja() {
+    void testGetAllMejaReturnsListOfMeja() {
         Meja meja1 = new Meja(1, "TERSEDIA");
         Meja meja2 = new Meja(2, "TERSEDIA");
 
@@ -52,7 +54,30 @@ class MejaControllerTest {
         assertNotNull(response.getBody());
 
         GetAllMejaResponse responseBody = (GetAllMejaResponse) response.getBody();
-        assertEquals("success", responseBody.getStatus());
+        assertEquals("Retrieved all tables successfully", responseBody.getStatus());
         assertEquals(2, responseBody.getData().size());
+    }
+
+    @Test
+    void testUpdateMejaSuccess(){
+        UUID id = UUID.randomUUID();
+        UpdateMejaRequest req = new UpdateMejaRequest();
+        req.setNomorMeja(7);
+        req.setStatus("TERSEDIA");
+
+        Meja upd = new Meja(7,"TERSEDIA");
+        when(mejaService.updateMeja(id,7,"TERSEDIA")).thenReturn(upd);
+
+        ResponseEntity<?> resp = mejaController.updateMeja(id, req);
+        assertEquals(200, resp.getStatusCodeValue());
+    }
+
+    @Test
+    void testDeleteMejaSuccess(){
+        UUID id = UUID.randomUUID();
+        doNothing().when(mejaService).deleteMeja(id);
+
+        ResponseEntity<?> resp = mejaController.deleteMeja(id);
+        assertEquals(200, resp.getStatusCodeValue());
     }
 }
