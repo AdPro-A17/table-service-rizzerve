@@ -43,6 +43,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-amqp")
 	runtimeOnly("org.postgresql:postgresql:42.7.3")
 
 	implementation("io.github.cdimascio:dotenv-java:2.3.2")
@@ -64,6 +65,9 @@ dependencies {
 	testImplementation("io.github.bonigarcia:selenium-jupiter:$seleniumJupiterVersion")
 	testImplementation("io.github.bonigarcia:webdrivermanager:$webdrivermanagerVersion")
 	testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+
+	testImplementation("org.testcontainers:junit-jupiter:1.19.7")
+	testImplementation("org.testcontainers:rabbitmq:1.19.7")
 }
 
 tasks.register<Test>("unitTest") {
