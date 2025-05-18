@@ -86,4 +86,9 @@ public class MejaServiceImpl implements MejaService {
     public Optional<Meja> findByNomorMeja(int nomorMeja) {
         return mejaRepository.findByNomorMeja(nomorMeja);
     }
+
+    @Override
+    public Optional<Meja> findById(UUID id) {
+        return mejaRepository.findById(id);
+    }
 }

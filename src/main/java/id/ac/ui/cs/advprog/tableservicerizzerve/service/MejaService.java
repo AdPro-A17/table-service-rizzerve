@@ -12,4 +12,5 @@ public interface MejaService {
     Meja updateMeja(UUID id, int nomor, String status);
     void deleteMeja(UUID id);
     Optional<Meja> findByNomorMeja(int nomorMeja);
+    Optional<Meja> findById(UUID id);
 }

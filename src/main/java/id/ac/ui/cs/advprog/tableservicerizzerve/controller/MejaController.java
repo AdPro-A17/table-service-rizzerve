@@ -35,6 +35,21 @@ public class MejaController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<GetMejaResponse> getMejaById(@PathVariable UUID id) {
+        return mejaService.findById(id)
+                .map(m -> ResponseEntity.ok(new GetMejaResponse("Table found", m)))
+                .orElseGet(() -> ResponseEntity.status(404).body(new GetMejaResponse("Table not found", null)));
+    }
+
+    @GetMapping("/nomor/{nomorMeja}")
+    public ResponseEntity<GetMejaResponse> getMejaByNomor(@PathVariable int nomorMeja) {
+        return mejaService.findByNomorMeja(nomorMeja)
+                .map(m -> ResponseEntity.ok(new GetMejaResponse("Table found", m)))
+                .orElseGet(() -> ResponseEntity.status(404).body(new GetMejaResponse("Table not found", null)));
+    }
+
     @PutMapping("/{id}/update")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<UpdateMejaResponse> updateMeja(@PathVariable UUID id, @RequestBody UpdateMejaRequest req){
