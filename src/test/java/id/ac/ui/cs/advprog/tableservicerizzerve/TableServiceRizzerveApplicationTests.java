@@ -14,6 +14,6 @@ class TableServiceRizzerveApplicationTests {
 
 	@Test
 	void applicationContextTest() {
-		TableServiceRizzerveApplication.main(new String[] {});
+		TableServiceRizzerveApplication.main(new String[] {"--server.port=8099"});
 	}
 }

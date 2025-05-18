@@ -1,36 +1,32 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
 import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
-import id.ac.ui.cs.advprog.tableservicerizzerve.exception.DuplicateNomorMejaException;
-import id.ac.ui.cs.advprog.tableservicerizzerve.exception.InvalidMejaStatusException;
-import id.ac.ui.cs.advprog.tableservicerizzerve.exception.InvalidNomorMejaException;
-import id.ac.ui.cs.advprog.tableservicerizzerve.exception.MejaNotFoundException;
+import id.ac.ui.cs.advprog.tableservicerizzerve.exception.*;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
-import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaCreatedEvent;
-import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaDeletedEvent;
-import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaUpdatedEvent;
+import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaEvent;
+import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaEventPublisher;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class MejaServiceTest {
 
     private MejaRepository mejaRepository;
-    private ApplicationEventPublisher eventPublisher;
+    private MejaEventPublisher eventPublisher;
     private MejaServiceImpl mejaService;
 
     @BeforeEach
     void setUp() {
         mejaRepository = mock(MejaRepository.class);
-        eventPublisher = mock(ApplicationEventPublisher.class);
+        eventPublisher = mock(MejaEventPublisher.class);
         mejaService    = new MejaServiceImpl(mejaRepository, eventPublisher);
     }
 
@@ -46,7 +42,7 @@ class MejaServiceTest {
         assertEquals(MejaStatus.TERSEDIA.getValue(), result.getStatus());
         verify(mejaRepository).findByNomorMeja(5);
         verify(mejaRepository).save(any(Meja.class));
-        verify(eventPublisher).publishEvent(any(MejaCreatedEvent.class));
+        verify(eventPublisher).publish(any(MejaEvent.class));
     }
 
     @Test
@@ -103,7 +99,7 @@ class MejaServiceTest {
 
         assertEquals(9, result.getNomorMeja());
         assertEquals(MejaStatus.TERPAKAI.getValue(), result.getStatus());
-        verify(eventPublisher).publishEvent(any(MejaUpdatedEvent.class));
+        verify(eventPublisher, atLeastOnce()).publish(any(MejaEvent.class));
     }
 
     @Test
@@ -158,15 +154,13 @@ class MejaServiceTest {
         UUID id = UUID.randomUUID();
         Meja existing = new Meja(4, MejaStatus.TERSEDIA.getValue());
         existing.setId(id);
-        when(mejaRepository.existsById(id)).thenReturn(true);
         when(mejaRepository.findById(id)).thenReturn(Optional.of(existing));
-        doNothing().when(mejaRepository).deleteById(id);
+        doNothing().when(mejaRepository).delete(existing);
 
         mejaService.deleteMeja(id);
 
-        verify(mejaRepository).existsById(id);
-        verify(mejaRepository).deleteById(id);
-        verify(eventPublisher).publishEvent(any(MejaDeletedEvent.class));
+        verify(mejaRepository).delete(existing);
+        verify(eventPublisher).publish(any(MejaEvent.class));
     }
 
     @Test
