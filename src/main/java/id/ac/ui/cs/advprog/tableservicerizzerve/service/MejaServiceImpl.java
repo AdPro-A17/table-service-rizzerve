@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -71,5 +72,10 @@ public class MejaServiceImpl implements MejaService {
         }
         mejaRepository.deleteById(id);
         eventPublisher.publishEvent(new MejaDeletedEvent(this, id));
+    }
+
+    @Override
+    public Optional<Meja> findByNomorMeja(int nomorMeja) {
+        return mejaRepository.findByNomorMeja(nomorMeja);
     }
 }

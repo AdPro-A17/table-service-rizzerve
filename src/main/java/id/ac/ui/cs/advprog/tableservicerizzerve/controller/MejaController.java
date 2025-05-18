@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/table")
@@ -45,5 +47,31 @@ public class MejaController {
     public ResponseEntity<DeleteMejaResponse> deleteMeja(@PathVariable UUID id){
         mejaService.deleteMeja(id);
         return ResponseEntity.ok(new DeleteMejaResponse("Table deleted successfully"));
+    }
+
+    @GetMapping("/check-availability")
+    public ResponseEntity<TableAvailabilityResponse> checkAvailability(
+            @RequestParam("tableNumber") int tableNumber) {
+        Optional<Meja> mejaOpt = mejaService.findByNomorMeja(tableNumber);
+        if (mejaOpt.isEmpty()) {
+            return ResponseEntity.ok(new TableAvailabilityResponse(false, "Table not found"));
+        }
+        Meja meja = mejaOpt.get();
+        boolean available = meja.getStatus().equalsIgnoreCase("TERSEDIA");
+        return ResponseEntity.ok(new TableAvailabilityResponse(available, available ? "TERSEDIA" : "TERPAKAI"));
+    }
+
+    @PutMapping("/update-status")
+    public ResponseEntity<TableUpdateResponse> updateStatus(
+            @RequestParam("tableNumber") int tableNumber,
+            @RequestParam("status") String status) {
+        Optional<Meja> mejaOpt = mejaService.findByNomorMeja(tableNumber);
+        if (mejaOpt.isEmpty()) {
+            return ResponseEntity.status(404).body(new TableUpdateResponse("Table not found", null));
+        }
+        Meja meja = mejaOpt.get();
+        meja.setStatus(MejaStatus.fromString(status));
+        mejaService.updateMeja(meja.getId(), meja.getNomorMeja(), status);
+        return ResponseEntity.ok(new TableUpdateResponse("Status updated", meja));
     }
 }

@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/h2-console/**", "/error").permitAll()
-                        .requestMatchers("/meja/**").hasAuthority("ROLE_ADMIN")
+                        .requestMatchers("/api/table/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
