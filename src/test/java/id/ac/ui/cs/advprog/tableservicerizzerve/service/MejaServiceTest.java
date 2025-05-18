@@ -212,4 +212,18 @@ class MejaServiceTest {
         assertTrue(result.isEmpty());
         verify(mejaRepository).findAll();
     }
+
+    @Test
+    void testFindByIdPresent() {
+        UUID id = UUID.randomUUID();
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(new Meja(6,"TERSEDIA")));
+        assertTrue(mejaService.findById(id).isPresent());
+    }
+
+    @Test
+    void testFindByIdEmpty() {
+        UUID id = UUID.randomUUID();
+        when(mejaRepository.findById(id)).thenReturn(Optional.empty());
+        assertTrue(mejaService.findById(id).isEmpty());
+    }
 }

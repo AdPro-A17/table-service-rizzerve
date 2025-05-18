@@ -138,4 +138,45 @@ class MejaControllerTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value("Table not found"));
     }
+
+    @Test
+    void testGetMejaByIdSuccess() throws Exception {
+        UUID id = UUID.randomUUID();
+        Meja meja = new Meja(12, MejaStatus.TERSEDIA.getValue()); meja.setId(id);
+        when(mejaService.findById(id)).thenReturn(Optional.of(meja));
+
+        mockMvc.perform(get("/api/table/" + id))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.meja.nomorMeja").value(12));
+    }
+
+    @Test
+    void testGetMejaByIdNotFound() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(mejaService.findById(id)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/table/" + id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.meja").isEmpty());
+    }
+
+    @Test
+    void testGetMejaByNomorSuccess() throws Exception {
+        Meja meja = new Meja(6, MejaStatus.TERSEDIA.getValue());
+        meja.setId(UUID.randomUUID());
+        when(mejaService.findByNomorMeja(6)).thenReturn(Optional.of(meja));
+
+        mockMvc.perform(get("/api/table/nomor/6"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.meja.nomorMeja").value(6));
+    }
+
+    @Test
+    void testGetMejaByNomorNotFound() throws Exception {
+        when(mejaService.findByNomorMeja(66)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/table/nomor/66"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.meja").value((Object) null));
+    }
 }
