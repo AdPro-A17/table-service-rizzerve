@@ -175,4 +175,47 @@ class MejaServiceTest {
         when(mejaRepository.findById(id)).thenReturn(Optional.empty());
         assertThrows(MejaNotFoundException.class, () -> mejaService.deleteMeja(id));
     }
+
+    @Test
+    void testFindByNomorMejaReturnsMeja() {
+        Meja meja = new Meja(10, MejaStatus.TERSEDIA.getValue());
+        when(mejaRepository.findByNomorMeja(10)).thenReturn(Optional.of(meja));
+
+        Optional<Meja> result = mejaService.findByNomorMeja(10);
+
+        assertTrue(result.isPresent());
+        assertEquals(10, result.get().getNomorMeja());
+        verify(mejaRepository).findByNomorMeja(10);
+    }
+
+    @Test
+    void testFindByNomorMejaReturnsEmpty() {
+        when(mejaRepository.findByNomorMeja(99)).thenReturn(Optional.empty());
+
+        Optional<Meja> result = mejaService.findByNomorMeja(99);
+
+        assertTrue(result.isEmpty());
+        verify(mejaRepository).findByNomorMeja(99);
+    }
+
+    @Test
+    void testUpdateMejaInvalidStatusThrows() {
+        UUID id = UUID.randomUUID();
+        Meja stored = new Meja(1, MejaStatus.TERSEDIA.getValue());
+        stored.setId(id);
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
+
+        assertThrows(InvalidMejaStatusException.class, () -> mejaService.updateMeja(id, 1, "BAD_STATUS"));
+    }
+
+    @Test
+    void testFindAllMejaEmpty() {
+        when(mejaRepository.findAll()).thenReturn(List.of());
+
+        List<Meja> result = mejaService.findAllMeja();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(mejaRepository).findAll();
+    }
 }
