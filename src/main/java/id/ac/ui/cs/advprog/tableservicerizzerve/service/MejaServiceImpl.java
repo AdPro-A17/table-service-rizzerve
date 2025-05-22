@@ -1,24 +1,37 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.OrderDataForTableDto;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.OrderItemSummaryDto;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.MejaWithOrderResponse;
 import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 import id.ac.ui.cs.advprog.tableservicerizzerve.exception.*;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
-import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaEvent;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.MejaEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaEventPublisher;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.core.type.TypeReference;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class MejaServiceImpl implements MejaService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MejaServiceImpl.class);
+
     private final MejaRepository mejaRepository;
     private final MejaEventPublisher eventPublisher;
+    private final ObjectMapper objectMapper;
 
     @Override
     @Transactional
@@ -88,7 +101,35 @@ public class MejaServiceImpl implements MejaService {
     }
 
     @Override
-    public Optional<Meja> findById(UUID id) {
-        return mejaRepository.findById(id);
+    public MejaWithOrderResponse findById(UUID id) {
+        Meja meja = mejaRepository.findById(id).orElseThrow(MejaNotFoundException::new);
+
+        OrderDataForTableDto currentOrderDto = null;
+
+        if (meja.getActiveOrderId() != null) {
+            List<OrderItemSummaryDto> items = Collections.emptyList();
+
+            if (meja.getActiveOrderItemsJson() != null && !meja.getActiveOrderItemsJson().isEmpty()) {
+                try {
+                    items = objectMapper.readValue(meja.getActiveOrderItemsJson(), new TypeReference<List<OrderItemSummaryDto>>() {});
+                } catch (Exception e) {
+                    LOGGER.error("Error deserializing active_order_items_json for mejaId {}: {}", meja.getId(), e.getMessage());
+                }
+            }
+
+            currentOrderDto = OrderDataForTableDto.builder()
+                    .orderId(meja.getActiveOrderId())
+                    .orderStatus(meja.getActiveOrderStatus())
+                    .totalPrice(meja.getActiveOrderTotalPrice() != null ? meja.getActiveOrderTotalPrice() : 0.0) // Handle jika Double bisa null
+                    .items(items)
+                    .build();
+        }
+
+        return MejaWithOrderResponse.builder()
+                .mejaId(meja.getId())
+                .nomorMeja(meja.getNomorMeja())
+                .statusMeja(meja.getStatus())
+                .currentOrder(currentOrderDto)
+                .build();
     }
 }

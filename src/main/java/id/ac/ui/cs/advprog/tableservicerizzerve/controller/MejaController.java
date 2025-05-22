@@ -37,10 +37,9 @@ public class MejaController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-    public ResponseEntity<GetMejaResponse> getMejaById(@PathVariable UUID id) {
-        return mejaService.findById(id)
-                .map(m -> ResponseEntity.ok(new GetMejaResponse("Table found", m)))
-                .orElseGet(() -> ResponseEntity.status(404).body(new GetMejaResponse("Table not found", null)));
+    public ResponseEntity<MejaWithOrderResponse> getMejaById(@PathVariable UUID id) {
+        MejaWithOrderResponse mejaWithOrderData = mejaService.findById(id);
+        return ResponseEntity.ok(mejaWithOrderData);
     }
 
     @GetMapping("/nomor/{nomorMeja}")
