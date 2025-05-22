@@ -1,5 +1,6 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.observer;
 
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.MejaEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
