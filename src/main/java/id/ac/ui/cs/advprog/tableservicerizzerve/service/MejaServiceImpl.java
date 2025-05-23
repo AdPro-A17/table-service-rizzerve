@@ -120,7 +120,7 @@ public class MejaServiceImpl implements MejaService {
             currentOrderDto = OrderDataForTableDto.builder()
                     .orderId(meja.getActiveOrderId())
                     .orderStatus(meja.getActiveOrderStatus())
-                    .totalPrice(meja.getActiveOrderTotalPrice() != null ? meja.getActiveOrderTotalPrice() : 0.0) // Handle jika Double bisa null
+                    .totalPrice(meja.getActiveOrderTotalPrice() != null ? meja.getActiveOrderTotalPrice() : 0.0)
                     .items(items)
                     .build();
         }
