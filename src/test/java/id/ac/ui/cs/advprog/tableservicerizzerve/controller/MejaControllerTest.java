@@ -22,8 +22,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.hamcrest.Matchers.is;
@@ -213,5 +212,21 @@ class MejaControllerTest {
         mockMvc.perform(put("/api/table/update-status?tableNumber=88&status=TERPAKAI"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.status").value("Table not found"));
+    }
+
+    @Test
+    void testGetAllMejaCustomerSuccess() throws Exception {
+        MejaCustomerViewDto meja1 = MejaCustomerViewDto.builder().nomorMeja(1).statusMeja(MejaStatus.TERSEDIA.getValue()).build();
+        MejaCustomerViewDto meja2 = MejaCustomerViewDto.builder().nomorMeja(2).statusMeja(MejaStatus.TERPAKAI.getValue()).build();
+        List<MejaCustomerViewDto> mejaList = List.of(meja1, meja2);
+
+        when(mejaService.findAllMejaForCustomer()).thenReturn(mejaList);
+
+        mockMvc.perform(get("/api/table/customer/all").contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Retrieved all tables for customer view successfully"))
+                .andExpect(jsonPath("$.data.length()").value(2))
+                .andExpect(jsonPath("$.data[0].nomorMeja").value(1))
+                .andExpect(jsonPath("$.data[1].nomorMeja").value(2));
     }
 }

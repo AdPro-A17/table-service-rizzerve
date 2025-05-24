@@ -2,10 +2,7 @@ package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.MejaEvent;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.MejaWithOrderResponse;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.OrderDataForTableDto;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.OrderItemSummaryDto;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.*;
 import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 import id.ac.ui.cs.advprog.tableservicerizzerve.exception.DuplicateNomorMejaException;
 import id.ac.ui.cs.advprog.tableservicerizzerve.exception.InvalidMejaStatusException;
@@ -442,5 +439,32 @@ class MejaServiceTest {
         assertNotNull(response.getCurrentOrder());
         assertEquals(0.0, response.getCurrentOrder().getTotalPrice());
         verify(mejaRepository).findById(mejaId);
+    }
+
+    @Test
+    void testFindAllMejaForCustomer() {
+        Meja m1 = new Meja(1, MejaStatus.TERSEDIA.getValue());
+        Meja m2 = new Meja(2, MejaStatus.TERPAKAI.getValue());
+        when(mejaRepository.findAll()).thenReturn(List.of(m1, m2));
+
+        List<MejaCustomerViewDto> result = mejaService.findAllMejaForCustomer();
+
+        assertEquals(2, result.size());
+        assertEquals(1, result.get(0).getNomorMeja());
+        assertEquals(MejaStatus.TERSEDIA.getValue(), result.get(0).getStatusMeja());
+        assertEquals(2, result.get(1).getNomorMeja());
+        assertEquals(MejaStatus.TERPAKAI.getValue(), result.get(1).getStatusMeja());
+        verify(mejaRepository).findAll();
+    }
+
+    @Test
+    void testFindAllMejaForCustomerEmpty() {
+        when(mejaRepository.findAll()).thenReturn(Collections.emptyList());
+
+        List<MejaCustomerViewDto> result = mejaService.findAllMejaForCustomer();
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(mejaRepository).findAll();
     }
 }
