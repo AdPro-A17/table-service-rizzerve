@@ -1,13 +1,10 @@
 package id.ac.ui.cs.advprog.tableservicerizzerve.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.OrderDataForTableDto;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.OrderItemSummaryDto;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.MejaWithOrderResponse;
+import id.ac.ui.cs.advprog.tableservicerizzerve.dto.*;
 import id.ac.ui.cs.advprog.tableservicerizzerve.enums.MejaStatus;
 import id.ac.ui.cs.advprog.tableservicerizzerve.exception.*;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
-import id.ac.ui.cs.advprog.tableservicerizzerve.dto.MejaEvent;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaEventPublisher;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -131,5 +129,15 @@ public class MejaServiceImpl implements MejaService {
                 .statusMeja(meja.getStatus())
                 .currentOrder(currentOrderDto)
                 .build();
+    }
+
+    @Override
+    public List<MejaCustomerViewDto> findAllMejaForCustomer() {
+        return mejaRepository.findAll().stream()
+                .map(meja -> MejaCustomerViewDto.builder()
+                        .nomorMeja(meja.getNomorMeja())
+                        .statusMeja(meja.getStatus())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

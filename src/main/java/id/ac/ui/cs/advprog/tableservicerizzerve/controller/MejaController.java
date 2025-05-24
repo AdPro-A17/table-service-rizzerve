@@ -35,6 +35,13 @@ public class MejaController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/customer/all")
+    public ResponseEntity<GetAllMejaCustomerResponse> getAllMejaForCustomer() {
+        List<MejaCustomerViewDto> mejaList = mejaService.findAllMejaForCustomer();
+        GetAllMejaCustomerResponse response = new GetAllMejaCustomerResponse("Retrieved all tables for customer view successfully", mejaList);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<MejaWithOrderResponse> getMejaById(@PathVariable UUID id) {
