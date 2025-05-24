@@ -51,7 +51,7 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
                     meja.setActiveOrderItemsJson(objectMapper.writeValueAsString(orderEvent.getItems()));
                 } catch (JsonProcessingException e) {
                     LOGGER.error("Error serializing order items to JSON for table {}: {}", nomorMeja, e.getMessage());
-                    meja.setActiveOrderItemsJson("[]"); // Default ke array JSON kosong jika error
+                    meja.setActiveOrderItemsJson("[]");
                 }
                 mejaRepository.save(meja);
                 LOGGER.info("Updated Meja {} with active order details from OrderID {}", nomorMeja, orderEvent.getOrderId());

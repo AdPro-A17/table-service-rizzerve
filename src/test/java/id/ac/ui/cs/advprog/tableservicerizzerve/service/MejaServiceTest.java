@@ -364,4 +364,83 @@ class MejaServiceTest {
         assertThrows(MejaNotFoundException.class, () -> mejaService.findById(nonExistentId));
         verify(mejaRepository).findById(nonExistentId);
     }
+
+    @Test
+    void testUpdateMejaSameNomorNoConflict() {
+        UUID id = UUID.randomUUID();
+        Meja stored = new Meja(5, MejaStatus.TERSEDIA.getValue());
+        stored.setId(id);
+
+        when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
+        when(mejaRepository.findByNomorMeja(5)).thenReturn(Optional.of(stored));
+        when(mejaRepository.save(any(Meja.class))).thenAnswer(i -> i.getArgument(0));
+        doNothing().when(eventPublisher).publish(any(MejaEvent.class));
+
+        Meja result = mejaService.updateMeja(id, 5, MejaStatus.TERPAKAI.getValue());
+
+        assertEquals(5, result.getNomorMeja());
+        assertEquals(MejaStatus.TERPAKAI.getValue(), result.getStatus());
+        verify(eventPublisher, times(1)).publish(argThat(event -> event.getType() == MejaEvent.Type.UPDATED_STATUS));
+    }
+
+    @Test
+    void testFindByIdWithEmptyActiveOrderItemsJson() throws IOException {
+        UUID mejaId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        Meja meja = new Meja(4, MejaStatus.TERPAKAI.getValue());
+        meja.setId(mejaId);
+        meja.setActiveOrderId(orderId);
+        meja.setActiveOrderStatus("NEW");
+        meja.setActiveOrderTotalPrice(100.0);
+        meja.setActiveOrderItemsJson("");
+        when(mejaRepository.findById(mejaId)).thenReturn(Optional.of(meja));
+
+        MejaWithOrderResponse response = mejaService.findById(mejaId);
+
+        assertNotNull(response);
+        assertNotNull(response.getCurrentOrder());
+        assertTrue(response.getCurrentOrder().getItems().isEmpty());
+        verify(objectMapper, never()).readValue(anyString(), any(TypeReference.class));
+    }
+
+    @Test
+    void testFindByIdWithJsonDeserializationError() throws IOException {
+        UUID mejaId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        Meja meja = new Meja(5, MejaStatus.TERPAKAI.getValue());
+        meja.setId(mejaId);
+        meja.setActiveOrderId(orderId);
+        meja.setActiveOrderStatus("PROCESSING");
+        meja.setActiveOrderTotalPrice(200.0);
+        meja.setActiveOrderItemsJson("{invalid json}");
+        when(mejaRepository.findById(mejaId)).thenReturn(Optional.of(meja));
+        when(objectMapper.readValue(eq("{invalid json}"), any(TypeReference.class))).thenThrow(new RuntimeException("JSON parsing error"));
+
+        MejaWithOrderResponse response = mejaService.findById(mejaId);
+
+        assertNotNull(response);
+        assertNotNull(response.getCurrentOrder());
+        assertTrue(response.getCurrentOrder().getItems().isEmpty());
+        verify(objectMapper).readValue(eq("{invalid json}"), any(TypeReference.class));
+    }
+
+    @Test
+    void testFindByIdWithNullActiveOrderTotalPrice() {
+        UUID mejaId = UUID.randomUUID();
+        UUID orderId = UUID.randomUUID();
+        Meja meja = new Meja(6, MejaStatus.TERPAKAI.getValue());
+        meja.setId(mejaId);
+        meja.setActiveOrderId(orderId);
+        meja.setActiveOrderStatus("NEW");
+        meja.setActiveOrderTotalPrice(null);
+        meja.setActiveOrderItemsJson(null);
+        when(mejaRepository.findById(mejaId)).thenReturn(Optional.of(meja));
+
+        MejaWithOrderResponse response = mejaService.findById(mejaId);
+
+        assertNotNull(response);
+        assertNotNull(response.getCurrentOrder());
+        assertEquals(0.0, response.getCurrentOrder().getTotalPrice());
+        verify(mejaRepository).findById(mejaId);
+    }
 }

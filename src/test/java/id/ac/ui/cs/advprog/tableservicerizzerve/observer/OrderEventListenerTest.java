@@ -100,4 +100,38 @@ class OrderEventListenerTest {
         assertDoesNotThrow(() -> orderEventListener.handleOrderEvent(event));
         verify(mejaOrderUpdaterService, times(1)).handleOrderCreatedForTable(event);
     }
+
+    @Test
+    void testHandleOrderEventWithMockedUnknownEventType() {
+        OrderDetailsEvent event = spy(OrderDetailsEvent.builder()
+                .eventType(OrderDetailsEvent.EventType.CREATED)
+                .orderId(UUID.randomUUID())
+                .tableNumber("108")
+                .orderStatus("UNKNOWN")
+                .totalPrice(50.0)
+                .items(Collections.emptyList())
+                .occurredAt(Instant.now())
+                .build());
+
+        when(event.getEventType()).thenReturn(null);
+
+        orderEventListener.handleOrderEvent(event);
+        verifyNoInteractions(mejaOrderUpdaterService);
+    }
+
+    @Test
+    void testSwitchDefaultCaseWithNullEventType() {
+        OrderDetailsEvent event = OrderDetailsEvent.builder()
+                .eventType(null)
+                .orderId(UUID.randomUUID())
+                .tableNumber("108")
+                .orderStatus("UNKNOWN")
+                .totalPrice(50.0)
+                .items(Collections.emptyList())
+                .occurredAt(Instant.now())
+                .build();
+
+        orderEventListener.handleOrderEvent(event);
+        verifyNoInteractions(mejaOrderUpdaterService);
+    }
 }

@@ -28,7 +28,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class MejaOrderUpdaterServiceImplTest {
+class MejaOrderUpdaterServiceTest {
     @Mock
     private MejaRepository mejaRepository;
 
@@ -196,6 +196,47 @@ class MejaOrderUpdaterServiceImplTest {
     @Test
     void testHandleOrderCreatedForTableNullTableNumber() {
         orderEvent.setTableNumber(null);
+        mejaOrderUpdaterService.handleOrderCreatedForTable(orderEvent);
+        verify(mejaRepository, never()).findByNomorMeja(anyInt());
+        verify(mejaRepository, never()).save(any(Meja.class));
+        verify(mejaEventPublisher, never()).publish(any(MejaEvent.class));
+    }
+
+    @Test
+    void testUpdateMejaWithActiveOrderDetailsInvalidTableNumberFormat() {
+        orderEvent.setTableNumber("invalid-number");
+        mejaOrderUpdaterService.updateMejaWithActiveOrderDetails(orderEvent);
+        verify(mejaRepository, never()).findByNomorMeja(anyInt());
+        verify(mejaRepository, never()).save(any(Meja.class));
+    }
+
+    @Test
+    void testClearActiveOrderFromMejaInvalidTableNumberFormat() {
+        mejaOrderUpdaterService.clearActiveOrderFromMeja("invalid-number");
+        verify(mejaRepository, never()).findByNomorMeja(anyInt());
+        verify(mejaRepository, never()).save(any(Meja.class));
+        verify(mejaEventPublisher, never()).publish(any(MejaEvent.class));
+    }
+    @Test
+    void testHandleOrderCreatedForTableJsonProcessingError() throws JsonProcessingException {
+        meja.setStatus(MejaStatus.TERSEDIA);
+        when(mejaRepository.findByNomorMeja(tableNumberInt)).thenReturn(Optional.of(meja));
+        when(objectMapper.writeValueAsString(orderEvent.getItems())).thenThrow(new JsonProcessingException("JSON error") {});
+        when(mejaRepository.save(any(Meja.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        doNothing().when(mejaEventPublisher).publish(any(MejaEvent.class));
+        mejaOrderUpdaterService.handleOrderCreatedForTable(orderEvent);
+
+        verify(mejaRepository).findByNomorMeja(tableNumberInt);
+        verify(objectMapper).writeValueAsString(orderEvent.getItems());
+        verify(mejaRepository).save(meja);
+        verify(mejaEventPublisher).publish(any(MejaEvent.class));
+
+        assertEquals("[]", meja.getActiveOrderItemsJson());
+    }
+
+    @Test
+    void testHandleOrderCreatedForTableInvalidTableNumberFormat() {
+        orderEvent.setTableNumber("invalid-number");
         mejaOrderUpdaterService.handleOrderCreatedForTable(orderEvent);
         verify(mejaRepository, never()).findByNomorMeja(anyInt());
         verify(mejaRepository, never()).save(any(Meja.class));
