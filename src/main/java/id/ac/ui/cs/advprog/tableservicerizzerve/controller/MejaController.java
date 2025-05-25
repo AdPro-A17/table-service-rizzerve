@@ -19,6 +19,7 @@ import java.util.Optional;
 public class MejaController {
 
     private final MejaService mejaService;
+    private static final String TABLE_NOT_FOUND = "Table not found";
 
     @PostMapping("/create")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -53,7 +54,7 @@ public class MejaController {
     public ResponseEntity<GetMejaResponse> getMejaByNomor(@PathVariable int nomorMeja) {
         return mejaService.findByNomorMeja(nomorMeja)
                 .map(m -> ResponseEntity.ok(new GetMejaResponse("Table found", m)))
-                .orElseGet(() -> ResponseEntity.status(404).body(new GetMejaResponse("Table not found", null)));
+                .orElseGet(() -> ResponseEntity.status(404).body(new GetMejaResponse(TABLE_NOT_FOUND, null)));
     }
 
     @PutMapping("/{id}/update")
@@ -75,7 +76,7 @@ public class MejaController {
             @RequestParam("tableNumber") int tableNumber) {
         Optional<Meja> mejaOpt = mejaService.findByNomorMeja(tableNumber);
         if (mejaOpt.isEmpty()) {
-            return ResponseEntity.ok(new TableAvailabilityResponse(false, "Table not found"));
+            return ResponseEntity.ok(new TableAvailabilityResponse(false, TABLE_NOT_FOUND));
         }
         Meja meja = mejaOpt.get();
         boolean available = meja.getStatus().equalsIgnoreCase("TERSEDIA");
@@ -88,7 +89,7 @@ public class MejaController {
             @RequestParam("status") String status) {
         Optional<Meja> mejaOpt = mejaService.findByNomorMeja(tableNumber);
         if (mejaOpt.isEmpty()) {
-            return ResponseEntity.status(404).body(new TableUpdateResponse("Table not found", null));
+            return ResponseEntity.status(404).body(new TableUpdateResponse(TABLE_NOT_FOUND, null));
         }
         Meja meja = mejaOpt.get();
         meja.setStatus(MejaStatus.fromString(status));

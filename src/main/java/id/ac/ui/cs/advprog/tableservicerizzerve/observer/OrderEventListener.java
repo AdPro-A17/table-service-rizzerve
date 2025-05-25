@@ -35,8 +35,7 @@ public class OrderEventListener {
                         mejaOrderUpdaterService.clearActiveOrderFromMeja(event.getTableNumber());
                     }
                     break;
-                case COMPLETED:
-                case CANCELLED:
+                case COMPLETED, CANCELLED:
                     mejaOrderUpdaterService.clearActiveOrderFromMeja(event.getTableNumber());
                     break;
                 default:
