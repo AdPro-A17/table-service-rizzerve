@@ -76,6 +76,7 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
             Optional<Meja> mejaOpt = mejaRepository.findByNomorMeja(nomorMeja);
             if (mejaOpt.isPresent()) {
                 Meja meja = mejaOpt.get();
+                meja.setStatus(MejaStatus.TERSEDIA);
                 meja.setActiveOrderId(null);
                 meja.setActiveOrderStatus(null);
                 meja.setActiveOrderTotalPrice(null);
