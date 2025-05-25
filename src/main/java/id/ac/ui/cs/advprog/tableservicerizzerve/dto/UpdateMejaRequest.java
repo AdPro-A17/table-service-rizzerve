@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotBlank;
 
 @Getter
 @Setter
-public class CreateMejaRequest {
-    @NotBlank(message = "Nomor meja cannot be emoty")
+public class UpdateMejaRequest {
+    @NotBlank(message = "Nomor meja cannot be empty")
     private int nomorMeja;
     private String status;
 }
