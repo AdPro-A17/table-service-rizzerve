@@ -25,6 +25,19 @@ public class Meja {
     @Column(nullable = false)
     private MejaStatus status;
 
+    @Column(name = "active_order_id", nullable = true)
+    private UUID activeOrderId;
+
+    @Column(name = "active_order_status", nullable = true)
+    private String activeOrderStatus;
+
+    @Column(name = "active_order_total_price", nullable = true)
+    private Double activeOrderTotalPrice;
+
+    @Lob
+    @Column(name = "active_order_items_json", columnDefinition = "TEXT", nullable = true)
+    private String activeOrderItemsJson;
+
     public Meja(int nomorMeja, String status) {
         this.id = UUID.randomUUID();
         this.nomorMeja = nomorMeja;

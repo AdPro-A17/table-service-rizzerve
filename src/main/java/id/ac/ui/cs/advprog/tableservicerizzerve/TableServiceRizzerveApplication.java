@@ -8,10 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class TableServiceRizzerveApplication {
 
 	public static void main(String[] args) {
-		try {
-			Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
-			dotenv.entries().forEach(e -> System.setProperty(e.getKey(), e.getValue()));
-		} catch (Exception ignored) {}
+		Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+		dotenv.entries().forEach(e -> System.setProperty(e.getKey(), e.getValue()));
 
 		SpringApplication.run(TableServiceRizzerveApplication.class, args);
 	}
