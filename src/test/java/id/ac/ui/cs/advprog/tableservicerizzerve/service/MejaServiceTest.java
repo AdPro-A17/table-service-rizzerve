@@ -44,10 +44,6 @@ class MejaServiceTest {
     @InjectMocks
     private MejaServiceImpl mejaService;
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @Test
     void testCreateMejaSuccess() {
         when(mejaRepository.findByNomorMeja(5)).thenReturn(Optional.empty());
@@ -98,7 +94,12 @@ class MejaServiceTest {
     void testCreateMejaDuplicateNomorShouldThrow() {
         Meja existingMeja = new Meja(5, MejaStatus.TERSEDIA.getValue());
         when(mejaRepository.findByNomorMeja(5)).thenReturn(Optional.of(existingMeja));
-        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.createMeja(5, MejaStatus.TERSEDIA.getValue()));
+
+        int nomorMeja = 5;
+        String status = MejaStatus.TERSEDIA.getValue();
+
+        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.createMeja(nomorMeja, status));
+
         verify(eventPublisher, never()).publish(any(MejaEvent.class));
     }
 

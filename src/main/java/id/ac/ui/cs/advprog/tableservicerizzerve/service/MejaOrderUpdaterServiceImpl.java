@@ -31,6 +31,15 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
         this.mejaEventPublisher = mejaEventPublisher;
     }
 
+    private void setOrderItemsJson(Meja meja, OrderDetailsEvent orderEvent, int nomorMeja) {
+        try {
+            meja.setActiveOrderItemsJson(objectMapper.writeValueAsString(orderEvent.getItems()));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Error serializing order items to JSON for table {}: {}", nomorMeja, e.getMessage());
+            meja.setActiveOrderItemsJson("[]");
+        }
+    }
+
     @Override
     @Transactional
     public void updateMejaWithActiveOrderDetails(OrderDetailsEvent orderEvent) {
@@ -47,12 +56,7 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
                 meja.setActiveOrderId(orderEvent.getOrderId());
                 meja.setActiveOrderStatus(orderEvent.getOrderStatus());
                 meja.setActiveOrderTotalPrice(orderEvent.getTotalPrice());
-                try {
-                    meja.setActiveOrderItemsJson(objectMapper.writeValueAsString(orderEvent.getItems()));
-                } catch (JsonProcessingException e) {
-                    LOGGER.error("Error serializing order items to JSON for table {}: {}", nomorMeja, e.getMessage());
-                    meja.setActiveOrderItemsJson("[]");
-                }
+                setOrderItemsJson(meja, orderEvent, nomorMeja);
                 mejaRepository.save(meja);
                 LOGGER.info("Updated Meja {} with active order details from OrderID {}", nomorMeja, orderEvent.getOrderId());
             } else {
@@ -108,12 +112,7 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
                 meja.setActiveOrderId(orderEvent.getOrderId());
                 meja.setActiveOrderStatus(orderEvent.getOrderStatus());
                 meja.setActiveOrderTotalPrice(orderEvent.getTotalPrice());
-                try {
-                    meja.setActiveOrderItemsJson(objectMapper.writeValueAsString(orderEvent.getItems()));
-                } catch (JsonProcessingException e) {
-                    LOGGER.error("Error serializing order items to JSON for table {} on order creation: {}", nomorMeja, e.getMessage());
-                    meja.setActiveOrderItemsJson("[]");
-                }
+                setOrderItemsJson(meja, orderEvent, nomorMeja);
 
                 if (!MejaStatus.TERPAKAI.getValue().equalsIgnoreCase(meja.getStatus())) {
                     meja.setStatus(MejaStatus.TERPAKAI);

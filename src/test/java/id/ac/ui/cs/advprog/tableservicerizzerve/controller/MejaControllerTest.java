@@ -136,7 +136,7 @@ class MejaControllerTest {
         req.setStatus(MejaStatus.TERSEDIA.getValue());
         Meja meja = new Meja(5, MejaStatus.TERSEDIA.getValue());
         meja.setId(id);
-        when(mejaService.updateMeja(eq(id), eq(5), eq(MejaStatus.TERSEDIA.getValue()))).thenReturn(meja);
+        when(mejaService.updateMeja(id, 5, MejaStatus.TERSEDIA.getValue())).thenReturn(meja);
 
         mockMvc.perform(put("/api/table/" + id + "/update")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -196,7 +196,7 @@ class MejaControllerTest {
         mejaSetelahUpdate.setId(mejaId);
 
         when(mejaService.findByNomorMeja(tableNumber)).thenReturn(Optional.of(mejaAwal));
-        when(mejaService.updateMeja(eq(mejaId), eq(tableNumber), eq(newStatus))).thenReturn(mejaSetelahUpdate);
+        when(mejaService.updateMeja(mejaId, tableNumber, newStatus)).thenReturn(mejaSetelahUpdate);
 
         mockMvc.perform(put("/api/table/update-status?tableNumber=" + tableNumber + "&status=" + newStatus))
                 .andExpect(status().isOk())

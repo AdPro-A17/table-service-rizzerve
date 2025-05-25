@@ -74,17 +74,22 @@ class RabbitMQConfigTest {
     @Qualifier("orderCompletedBindingToTableService")
     private Binding orderCompletedBinding;
 
-
     @Test
     void objectMapperBeanIsConfigured() {
         assertNotNull(objectMapper, "ObjectMapper bean should be created.");
-        assertTrue(objectMapper.canSerialize(java.time.Instant.class), "ObjectMapper should be able to serialize Instant.");
+        try {
+            String result = objectMapper.writeValueAsString(java.time.Instant.now());
+            assertNotNull(result, "ObjectMapper should be able to serialize Instant.");
+            assertFalse(result.isEmpty(), "Serialized Instant should not be empty.");
+        } catch (Exception e) {
+            fail("ObjectMapper should be able to serialize Instant without throwing exception: " + e.getMessage());
+        }
     }
 
     @Test
     void jsonMessageConverterBeanIsConfigured() {
         assertNotNull(jsonMessageConverter, "jsonMessageConverter bean should be created.");
-        assertTrue(jsonMessageConverter instanceof Jackson2JsonMessageConverter, "Converter should be Jackson2JsonMessageConverter.");
+        assertInstanceOf(Jackson2JsonMessageConverter.class, jsonMessageConverter, "Converter should be Jackson2JsonMessageConverter.");
     }
 
     @Test
