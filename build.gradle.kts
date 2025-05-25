@@ -44,7 +44,6 @@ val junitJupiterVersion = "5.9.1"
 val micrometerPrometheusVersion = "1.12.2"
 
 dependencies {
-	// Spring Boot Starters
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -52,39 +51,31 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-amqp")
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
-
-	// Database
-	runtimeOnly("org.postgresql:postgresql:$postgresqlVersion")
-
-	// External Libraries
 	implementation("io.github.cdimascio:dotenv-java:$dotenvJavaVersion")
 	implementation("io.micrometer:micrometer-registry-prometheus:$micrometerPrometheusVersion")
-
-	// JWT
 	implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+
+	runtimeOnly("org.postgresql:postgresql:$postgresqlVersion")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
 
-	// Development Tools
 	compileOnly("org.projectlombok:lombok")
+
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
+
 	annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
 	annotationProcessor("org.projectlombok:lombok")
 
-	// Test Dependencies
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
-	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	testImplementation("com.h2database:h2:$h2Version")
-	testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
-
-	// Test Containers
 	testImplementation("org.testcontainers:junit-jupiter:$testcontainersVersion")
 	testImplementation("org.testcontainers:rabbitmq:$testcontainersVersion")
-
-	// Selenium Testing
 	testImplementation("org.seleniumhq.selenium:selenium-java:$seleniumJavaVersion")
 	testImplementation("io.github.bonigarcia:selenium-jupiter:$seleniumJupiterVersion")
 	testImplementation("io.github.bonigarcia:webdrivermanager:$webdrivermanagerVersion")
+	testImplementation("org.junit.jupiter:junit-jupiter:$junitJupiterVersion")
+
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks.register<Test>("unitTest") {

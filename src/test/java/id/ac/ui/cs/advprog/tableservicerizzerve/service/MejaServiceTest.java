@@ -11,7 +11,6 @@ import id.ac.ui.cs.advprog.tableservicerizzerve.exception.MejaNotFoundException;
 import id.ac.ui.cs.advprog.tableservicerizzerve.observer.MejaEventPublisher;
 import id.ac.ui.cs.advprog.tableservicerizzerve.model.Meja;
 import id.ac.ui.cs.advprog.tableservicerizzerve.repository.MejaRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
