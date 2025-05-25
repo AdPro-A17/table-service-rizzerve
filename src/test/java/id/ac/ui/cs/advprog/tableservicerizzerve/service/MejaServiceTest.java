@@ -79,9 +79,11 @@ class MejaServiceTest {
         assertEquals(MejaStatus.TERSEDIA.getValue(), result.getStatus());
     }
 
+
     @Test
     void testCreateMejaInvalidNomorShouldThrow() {
-        assertThrows(InvalidNomorMejaException.class, () -> mejaService.createMeja(0, MejaStatus.TERSEDIA.getValue()));
+        String validStatus = MejaStatus.TERSEDIA.getValue();
+        assertThrows(InvalidNomorMejaException.class, () -> mejaService.createMeja(0, validStatus));
         verify(eventPublisher, never()).publish(any(MejaEvent.class));
     }
 
@@ -173,12 +175,13 @@ class MejaServiceTest {
         Meja stored   = new Meja(3,  MejaStatus.TERSEDIA.getValue());
         stored.setId(id);
         Meja conflict = new Meja(7,  MejaStatus.TERSEDIA.getValue());
-        conflict.setId(UUID.randomUUID()); // ID berbeda
+        conflict.setId(UUID.randomUUID());
 
         when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
         when(mejaRepository.findByNomorMeja(7)).thenReturn(Optional.of(conflict));
 
-        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.updateMeja(id, 7, MejaStatus.TERSEDIA.getValue()));
+        String validStatus = MejaStatus.TERSEDIA.getValue();
+        assertThrows(DuplicateNomorMejaException.class, () -> mejaService.updateMeja(id, 7, validStatus));
         verify(eventPublisher, never()).publish(any(MejaEvent.class));
     }
 
@@ -186,7 +189,9 @@ class MejaServiceTest {
     void testUpdateMejaNotFoundThrows() {
         UUID id = UUID.randomUUID();
         when(mejaRepository.findById(id)).thenReturn(Optional.empty());
-        assertThrows(MejaNotFoundException.class, () -> mejaService.updateMeja(id, 5, MejaStatus.TERSEDIA.getValue()));
+
+        String validStatus = MejaStatus.TERSEDIA.getValue();
+        assertThrows(MejaNotFoundException.class, () -> mejaService.updateMeja(id, 5, validStatus));
         verify(eventPublisher, never()).publish(any(MejaEvent.class));
     }
 
@@ -197,7 +202,8 @@ class MejaServiceTest {
         stored.setId(id);
         when(mejaRepository.findById(id)).thenReturn(Optional.of(stored));
 
-        assertThrows(InvalidNomorMejaException.class, () -> mejaService.updateMeja(id, 0, MejaStatus.TERSEDIA.getValue()));
+        String validStatus = MejaStatus.TERSEDIA.getValue();
+        assertThrows(InvalidNomorMejaException.class, () -> mejaService.updateMeja(id, 0, validStatus));
         verify(eventPublisher, never()).publish(any(MejaEvent.class));
     }
 
