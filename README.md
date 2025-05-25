@@ -1,3 +1,49 @@
+# Bukti Melakukan Profiling Aplikasi (Table Service)
+
+Bagian ini mendokumentasikan langkah-langkah yang dilakukan untuk melakukan profiling pada `Table Service` menggunakan profiler bawaan IntelliJ. Tujuan dari profiling ini adalah untuk mengidentifikasi potensi bottleneck performa dan area yang memerlukan optimasi. Saya menggunakan profiling yang sudah tersedia di Intellij untuk kemudahan dan karena sudah terintegrasi langsung.
+
+Berikut adalah langkah-langkah yang saya lakukan untuk melakukan profiling:
+
+1.  **Memulai Sesi Profiling dari Toolbar:**
+    Dengan proyek `table-service-rizzerve` sudah terbuka di IntelliJ, sesi profiling dimulai dengan memilih Run Configuration `TableServiceRizzerveApplication` yang sudah ada di toolbar atas. Kemudian, tombol "Profile" ditekan untuk memulai aplikasi dengan profiler terpasang. Opsi yang dipilih adalah "Profile 'TableServiceRizzerveApplication' with IntelliJ Profiler".
+    
+    ![Screenshot 2025-05-25 144602](https://github.com/user-attachments/assets/8aefc58a-b545-457f-8c0a-2463a5c60b89)
+
+2.  **Menjalankan Skenario Pengujian:**
+    Setelah aplikasi berjalan dengan profiler terpasang, skenario pengujian yang relevan dijalankan untuk memicu code path yang ingin dianalisis. Ini termasuk:
+    *   Memanggil endpoint API untuk `createMeja`.
+    *   Memanggil endpoint API untuk `findAllMeja`.
+    *   Memanggil endpoint API untuk `findAllMejaForCustomer`.
+    *   Memanggil endpoint API untuk `updateMeja`.
+    *   Memanggil endpoint API untuk `deleteMeja`.
+        Skenario ini dijalankan beberapa kali untuk memastikan data profiling yang representatif terkumpul.
+        
+    ![Screenshot 2025-05-25 144623](https://github.com/user-attachments/assets/2e96c81d-0233-4cd7-8cd2-34b3a9988cfe)
+
+
+3.  **Menghentikan Sesi Profiling dan Menganalisis Hasil:**
+    Setelah skenario pengujian selesai, sesi profiling dihentikan. IntelliJ kemudian menampilkan hasil profiling di *Profiler tool window*.
+    
+    ![Screenshot 2025-05-25 144725](https://github.com/user-attachments/assets/bd1bba9b-4a37-4f40-86fa-df16a93dc093)
+
+
+    *   **Tampilan Awal Hasil Profiling (Contoh: CPU Time / Method List):**
+        Hasil awal menunjukkan daftar method yang dieksekusi beserta metrik performanya seperti "CPU Time".
+
+        ![Screenshot 2025-05-25 151656](https://github.com/user-attachments/assets/01542834-6c1e-49ca-b4ca-43efa488b4b6)
+
+
+4.  **Analisis Mendalam pada Method yang Teridentifikasi:**
+    Berdasarkan hasil awal, method-method yang memiliki "Execution time" tinggi diinvestigasi lebih lanjut.
+
+    ![Screenshot 2025-05-25 144202](https://github.com/user-attachments/assets/089d380c-8838-4088-81f2-3cf1ddeef47e)
+
+    Walaupun secara keseluruhan semua method sudah cukup efisien, bisa dilihat bahwa method `createMeja` disini memiliki execution time yang lebih tinggi dibandingkan dengan method-method yang lainnya, yaitu bisa hampir 2x-4x execution time dari method lain.
+
+## Analisis Improvement Yang Perlu Dilakukan
+
+Dari hasil profiling, bisa disimpulkan bahwa method `createMeja`  walaupun sudah cukup efisien bisa dioptimisasi lagi agar memiliki execution time yang lebih kecil dari sekarang. Salah satu improvement yang mungkin adalah men-handle duplication `Meja` di database saja dan tidak dalam kode langsung.
+
 # Diagram A17 - Rizzerve
 - Context Diagram
 ![image](https://github.com/user-attachments/assets/ffed3051-0812-4910-a090-19e41b8d4acb)
