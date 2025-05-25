@@ -60,16 +60,19 @@ public class RabbitMQConfig {
 
     @Bean
     public TopicExchange orderEventsSubscriberExchange() {
+        System.out.println("🎯 DEBUG: Creating order events exchange: " + orderEventsExchangeName);
         return new TopicExchange(orderEventsExchangeName, true, false);
     }
 
     @Bean
     public Queue tableServiceOrderEventsQueue() {
+        System.out.println("🎯 DEBUG: Creating queue: " + tableServiceOrderEventsQueueName);
         return new Queue(tableServiceOrderEventsQueueName, true);
     }
 
     @Bean
     public Binding orderCreatedBindingToTableService( @Qualifier("tableServiceOrderEventsQueue") Queue queue, @Qualifier("orderEventsSubscriberExchange") TopicExchange exchange) {
+        System.out.println("🎯 DEBUG: Creating binding for ORDER_CREATED: " + rkOrderCreated);
         return BindingBuilder.bind(queue).to(exchange).with(rkOrderCreated);
     }
 

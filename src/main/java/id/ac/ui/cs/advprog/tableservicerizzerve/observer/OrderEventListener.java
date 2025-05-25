@@ -17,6 +17,7 @@ public class OrderEventListener {
     @Autowired
     public OrderEventListener(MejaOrderUpdaterService mejaOrderUpdaterService) {
         this.mejaOrderUpdaterService = mejaOrderUpdaterService;
+        System.out.println("🎯 DEBUG: OrderEventListener initialized and ready to receive events");
     }
 
     @RabbitListener(queues = "${app.rabbitmq.queue.table-service.for-order-events}")
@@ -26,7 +27,9 @@ public class OrderEventListener {
         try {
             switch (event.getEventType()) {
                 case CREATED:
+                    System.out.println("🎯 DEBUG: Table service received ORDER_CREATED event - OrderID: " + event.getOrderId() + ", Table: " + event.getTableNumber());
                     mejaOrderUpdaterService.handleOrderCreatedForTable(event);
+                    System.out.println("🎯 DEBUG: Finished processing ORDER_CREATED event for table: " + event.getTableNumber());
                     break;
                 case UPDATED:
                     if ("NEW".equals(event.getOrderStatus()) || "PROCESSING".equals(event.getOrderStatus())) {

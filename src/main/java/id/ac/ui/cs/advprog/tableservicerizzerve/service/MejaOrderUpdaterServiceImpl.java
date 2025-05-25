@@ -31,15 +31,6 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
         this.mejaEventPublisher = mejaEventPublisher;
     }
 
-    private void setOrderItemsJson(Meja meja, OrderDetailsEvent orderEvent, int nomorMeja) {
-        try {
-            meja.setActiveOrderItemsJson(objectMapper.writeValueAsString(orderEvent.getItems()));
-        } catch (JsonProcessingException e) {
-            LOGGER.error("Error serializing order items to JSON for table {}: {}", nomorMeja, e.getMessage());
-            meja.setActiveOrderItemsJson("[]");
-        }
-    }
-
     @Override
     @Transactional
     public void updateMejaWithActiveOrderDetails(OrderDetailsEvent orderEvent) {
@@ -56,7 +47,12 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
                 meja.setActiveOrderId(orderEvent.getOrderId());
                 meja.setActiveOrderStatus(orderEvent.getOrderStatus());
                 meja.setActiveOrderTotalPrice(orderEvent.getTotalPrice());
-                setOrderItemsJson(meja, orderEvent, nomorMeja);
+                try {
+                    meja.setActiveOrderItemsJson(objectMapper.writeValueAsString(orderEvent.getItems()));
+                } catch (JsonProcessingException e) {
+                    LOGGER.error("Error serializing order items to JSON for table {}: {}", nomorMeja, e.getMessage());
+                    meja.setActiveOrderItemsJson("[]");
+                }
                 mejaRepository.save(meja);
                 LOGGER.info("Updated Meja {} with active order details from OrderID {}", nomorMeja, orderEvent.getOrderId());
             } else {
@@ -80,13 +76,24 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
             Optional<Meja> mejaOpt = mejaRepository.findByNomorMeja(nomorMeja);
             if (mejaOpt.isPresent()) {
                 Meja meja = mejaOpt.get();
-                meja.setStatus(MejaStatus.TERSEDIA);
+                
+                LOGGER.info("Before clearing - Meja {}: status={}, activeOrderId={}", 
+                    nomorMeja, meja.getStatus(), meja.getActiveOrderId());
+                
                 meja.setActiveOrderId(null);
                 meja.setActiveOrderStatus(null);
                 meja.setActiveOrderTotalPrice(null);
                 meja.setActiveOrderItemsJson(null);
-                mejaRepository.save(meja);
-                LOGGER.info("Cleared active order details from Meja {}", nomorMeja);
+                
+                // Reset table status to TERSEDIA when clearing order
+                meja.setStatus(MejaStatus.TERSEDIA);
+                
+                Meja updatedMeja = mejaRepository.save(meja);
+                
+                LOGGER.info("After clearing - Meja {}: status={}, activeOrderId={}", 
+                    nomorMeja, updatedMeja.getStatus(), updatedMeja.getActiveOrderId());
+                
+                LOGGER.info("Cleared active order details from Meja {} and reset status to TERSEDIA", nomorMeja);
             } else {
                 LOGGER.warn("Meja with number {} not found in TableService when trying to clear active order.", nomorMeja);
             }
@@ -109,29 +116,43 @@ public class MejaOrderUpdaterServiceImpl implements MejaOrderUpdaterService {
 
             if (mejaOpt.isPresent()) {
                 Meja meja = mejaOpt.get();
+                
+                LOGGER.info("Before update - Meja {}: status={}, activeOrderId={}, activeOrderStatus={}", 
+                    nomorMeja, meja.getStatus(), meja.getActiveOrderId(), meja.getActiveOrderStatus());
+                
                 meja.setActiveOrderId(orderEvent.getOrderId());
                 meja.setActiveOrderStatus(orderEvent.getOrderStatus());
                 meja.setActiveOrderTotalPrice(orderEvent.getTotalPrice());
-                setOrderItemsJson(meja, orderEvent, nomorMeja);
+                
+                LOGGER.info("Setting active order fields - OrderID: {}, Status: {}, TotalPrice: {}", 
+                    orderEvent.getOrderId(), orderEvent.getOrderStatus(), orderEvent.getTotalPrice());
+                
+                try {
+                    meja.setActiveOrderItemsJson(objectMapper.writeValueAsString(orderEvent.getItems()));
+                } catch (JsonProcessingException e) {
+                    LOGGER.error("Error serializing order items to JSON for table {} on order creation: {}", nomorMeja, e.getMessage());
+                    meja.setActiveOrderItemsJson("[]");
+                }
 
                 if (!MejaStatus.TERPAKAI.getValue().equalsIgnoreCase(meja.getStatus())) {
                     meja.setStatus(MejaStatus.TERPAKAI);
                     LOGGER.info("Meja {} status set to TERPAKAI due to new order {}.", nomorMeja, orderEvent.getOrderId());
-                    Meja updatedMeja = mejaRepository.save(meja);
-
-                    mejaEventPublisher.publish(new MejaEvent(
-                            MejaEvent.Type.UPDATED_STATUS,
-                            updatedMeja.getId(),
-                            updatedMeja.getNomorMeja(),
-                            null,
-                            updatedMeja.getStatus(),
-                            Instant.now()
-                    ));
-                    LOGGER.info("Published MejaEvent.UPDATED_STATUS for Meja {} after order creation.", nomorMeja);
-                } else {
-                    mejaRepository.save(meja);
-                    LOGGER.info("Meja {} was already TERPAKAI. Updated with active order details from OrderID {}.", nomorMeja, orderEvent.getOrderId());
                 }
+                
+                Meja updatedMeja = mejaRepository.save(meja);
+                
+                LOGGER.info("After save - Meja {}: status={}, activeOrderId={}, activeOrderStatus={}", 
+                    nomorMeja, updatedMeja.getStatus(), updatedMeja.getActiveOrderId(), updatedMeja.getActiveOrderStatus());
+
+                mejaEventPublisher.publish(new MejaEvent(
+                        MejaEvent.Type.UPDATED_STATUS,
+                        updatedMeja.getId(),
+                        updatedMeja.getNomorMeja(),
+                        null,
+                        updatedMeja.getStatus(),
+                        Instant.now()
+                ));
+                LOGGER.info("Published MejaEvent.UPDATED_STATUS for Meja {} after order creation.", nomorMeja);
             } else {
                 LOGGER.warn("Meja with number {} not found in TableService when processing ORDER_CREATED event from OrderID {}",
                         nomorMeja, orderEvent.getOrderId());
