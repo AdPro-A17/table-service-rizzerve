@@ -94,6 +94,7 @@ public class MejaServiceImpl implements MejaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Meja> findByNomorMeja(int nomorMeja) {
         return mejaRepository.findByNomorMeja(nomorMeja);
     }
