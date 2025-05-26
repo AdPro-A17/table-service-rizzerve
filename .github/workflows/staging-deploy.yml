@@ -50,5 +50,11 @@ jobs:
               -e PGDATABASE='${PGDATABASE}' \
               -e PGUSER='${PGUSER}' \
               -e PGPASSWORD='${PGPASSWORD}' \
+              -e RABBITMQ_HOST='${RABBITMQ_HOST}' \
+              -e RABBITMQ_PORT='${RABBITMQ_PORT}' \
+              -e RABBITMQ_USERNAME='${RABBITMQ_USERNAME}' \
+              -e RABBITMQ_PASSWORD='${RABBITMQ_PASSWORD}' \
+              -e RABBITMQ_VHOST='${RABBITMQ_VHOST}' \
+              -e RABBITMQ_SSL_ENABLED='${RABBITMQ_SSL_ENABLED}' \
               table-service-rizzerve:latest
           EOF
